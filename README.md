@@ -1,4 +1,4 @@
-# Welcome to your Lovable project
+# Blazz Showcase | Portafolio Fabian Mendoza
 
 ## Project info
 
