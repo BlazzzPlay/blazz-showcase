@@ -1,8 +1,9 @@
 {
-  "name": "hello-world-test",
-  "private": true,
+  "name": "blazz-showcase-starter",
   "version": "1.0.0",
+  "type": "module",
   "scripts": {
-    "build": "echo '>>> INICIANDO EL BUILD DE PRUEBA...'; mkdir dist; cp index.html dist/; echo '>>> COPIADO index.html A dist/'; ls -R dist/; echo '>>> BUILD COMPLETADO EXITOSAMENTE.'"
+    "build": "mkdir -p dist && cp index.html dist/",
+    "start": "node server.js"
   }
 }
