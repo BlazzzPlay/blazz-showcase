@@ -1,0 +1,298 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/Navigation.astro';
+import Hero from '../components/Hero.astro';
+import Projects from '../components/Projects.astro';
+import Footer from '../components/Footer.astro';
+
+const stats = [
+  { value: '+10', label: 'Años de experiencia' },
+  { value: 'SaaS', label: 'Desarrollo & EdTech' },
+  { value: '2015', label: 'Titulado Ing. Informática' },
+  { value: 'Chile', label: 'Base de operaciones' },
+];
+---
+
+<Layout title="Portafolio Profesional">
+	<Navigation />
+	<main>
+		<Hero />
+		<Projects />
+		
+		<section id="sobre-mi" class="about section-padding">
+			<div class="container">
+				<div class="glass about-content">
+					<div class="about-header text-center">
+						<p class="tagline uppercase tracking-widest font-semibold mb-3">Sobre mí</p>
+						<h2 class="section-title">Construyendo el <span class="gradient-text">futuro digital</span></h2>
+					</div>
+					<div class="about-grid">
+						<div class="about-text">
+							<p>Soy <strong>Fabian Mendoza</strong>, Ingeniero en Informática con más de una década de experiencia apasionado por transformar la educación y la gestión administrativa a través de la tecnología.</p>
+							<p>Actualmente me desempeño como <strong>Jefe de Informática en Colegio Montessori</strong>, donde lidero proyectos de transformación digital. En paralelo, desarrollo soluciones <strong>SaaS como EduCal Chile</strong>, diseñadas para optimizar la labor docente.</p>
+							<p>Mi enfoque combina una sólida base técnica en desarrollo de software (React, TypeScript, Node.js) con una visión estratégica para resolver problemas reales del sistema educativo chileno.</p>
+						</div>
+					</div>
+					
+					<div class="stats-grid">
+						{stats.map(s => (
+							<div class="stat-card glass">
+								<span class="stat-value gradient-text">{s.value}</span>
+								<span class="stat-label">{s.label}</span>
+							</div>
+						))}
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<section id="contacto" class="contact section-padding">
+			<div class="container">
+				<div class="glass contact-content max-w-4xl mx-auto">
+					<div class="contact-header text-center mb-10">
+						<p class="tagline uppercase tracking-widest font-semibold mb-3">Contacto</p>
+						<h2 class="section-title">Hablemos de tu <span class="gradient-text">próximo proyecto</span></h2>
+						<p class="contact-desc">¿Tienes una idea en mente? Completa el formulario y te contactaré a la brevedad.</p>
+					</div>
+
+					<form method="POST" id="contact-form" class="contact-form">
+						<div class="form-grid">
+							<div class="form-group">
+								<label for="name">Nombre</label>
+								<input type="text" id="name" name="name" placeholder="Tu nombre" required class="glass input-field" />
+							</div>
+							<div class="form-group">
+								<label for="email">Email</label>
+								<input type="email" id="email" name="email" placeholder="tu@email.com" required class="glass input-field" />
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="subject">Asunto</label>
+							<input type="text" id="subject" name="subject" placeholder="¿En qué puedo ayudarte?" required class="glass input-field" />
+						</div>
+						<div class="form-group">
+							<label for="message">Mensaje</label>
+							<textarea id="message" name="message" rows="5" placeholder="Cuéntame más sobre tu idea..." required class="glass input-field"></textarea>
+						</div>
+						
+						<div class="form-actions">
+							<button type="submit" class="btn btn-primary btn-large w-full">Registrar Solicitud</button>
+						</div>
+						<div id="form-message" class="form-status hidden"></div>
+					</form>
+				</div>
+			</div>
+		</section>
+	</main>
+	<Footer />
+</Layout>
+
+<script>
+	import { actions } from 'astro:actions';
+
+	const form = document.querySelector('#contact-form') as HTMLFormElement;
+	const statusMsg = document.querySelector('#form-message') as HTMLElement;
+
+	form?.addEventListener('submit', async (e) => {
+		e.preventDefault();
+		const formData = new FormData(form);
+		
+		// Visual feedback
+		const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+		const originalText = submitBtn.innerText;
+		submitBtn.innerText = 'Enviando...';
+		submitBtn.disabled = true;
+
+		try {
+			const { data, error } = await actions.submitContact(formData);
+			
+			statusMsg.classList.remove('hidden', 'success', 'error');
+			
+			if (error) {
+				statusMsg.innerText = error.message || 'Error al enviar.';
+				statusMsg.classList.add('error');
+			} else if (data?.success) {
+				statusMsg.innerText = data.message;
+				statusMsg.classList.add('success');
+				form.reset();
+			}
+		} catch (e) {
+			statusMsg.innerText = 'Error crítico en el servidor.';
+			statusMsg.classList.add('error');
+			statusMsg.classList.remove('hidden');
+		} finally {
+			submitBtn.innerText = originalText;
+			submitBtn.disabled = false;
+		}
+	});
+</script>
+
+<style>
+	main {
+		overflow-x: hidden;
+	}
+
+	.tagline {
+		color: hsl(var(--primary-light));
+		font-size: 0.8rem;
+		letter-spacing: 0.2em;
+	}
+
+	.about-content {
+		padding: 5rem;
+		border-radius: 2rem;
+	}
+
+	.about-text {
+		max-width: 800px;
+		margin: 0 auto 5rem;
+		text-align: center;
+	}
+
+	.about-text p {
+		font-size: 1.125rem;
+		line-height: 1.8;
+		color: hsl(var(--text-muted));
+		margin-bottom: 1.5rem;
+	}
+
+	.stats-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+		gap: 2rem;
+	}
+
+	.stat-card {
+		padding: 2.5rem;
+		text-align: center;
+		transition: transform 0.3s ease;
+		border-radius: 1.5rem;
+	}
+
+	.stat-card:hover {
+		transform: scale(1.05);
+		border-color: hsl(var(--primary-light) / 0.5);
+	}
+
+	.stat-value {
+		display: block;
+		font-family: var(--font-display);
+		font-size: 3rem;
+		font-weight: 800;
+		margin-bottom: 0.5rem;
+	}
+
+	.stat-label {
+		font-size: 0.85rem;
+		color: hsl(var(--text-muted));
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+	}
+
+	.contact-content {
+		padding: 5rem;
+		border-radius: 2.5rem;
+	}
+
+	.contact-desc {
+		font-size: 1.125rem;
+		color: hsl(var(--text-muted));
+		max-width: 600px;
+		margin: 1rem auto 0;
+	}
+
+	.contact-form {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+		max-width: 600px;
+		margin: 0 auto;
+		text-align: left;
+	}
+
+	.form-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 1.5rem;
+	}
+
+	.form-group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.form-group label {
+		font-size: 0.9rem;
+		font-weight: 600;
+		color: hsl(var(--text-muted));
+	}
+
+	.input-field {
+		padding: 0.75rem 1rem;
+		color: white;
+		outline: none;
+		transition: border-color 0.2s;
+		font-family: inherit;
+	}
+
+	.input-field:focus {
+		border-color: hsl(var(--primary-light));
+		background: hsla(224, 71%, 15%, 0.6);
+	}
+
+	.form-status {
+		margin-top: 1rem;
+		padding: 1rem;
+		border-radius: 0.75rem;
+		font-size: 0.9rem;
+		font-weight: 600;
+		text-align: center;
+	}
+	
+	.form-status.success {
+		background: hsla(1189, 74%, 43%, 0.2);
+		color: hsl(1189, 74%, 43%);
+		border: 1px solid hsla(1189, 74%, 43%, 0.3);
+	}
+
+	.form-status.error {
+		background: hsla(0, 84%, 60%, 0.2);
+		color: hsl(0, 84%, 60%);
+		border: 1px solid hsla(0, 84%, 60%, 0.3);
+	}
+
+	.hidden {
+		display: none;
+	}
+
+	.btn-large {
+		padding: 1.25rem 3rem;
+		font-size: 1.1rem;
+	}
+
+	.w-full {
+		width: 100%;
+	}
+
+	@media (max-width: 768px) {
+		.about-content, .contact-content {
+			padding: 3rem 1.5rem;
+		}
+		
+		.stats-grid {
+			grid-template-columns: 1fr 1fr;
+		}
+
+		.form-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+	
+	@media (max-width: 480px) {
+		.stats-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>

@@ -1,0 +1,38 @@
+---
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="container footer-content glass">
+    <div class="footer-bottom">
+      <p>© {currentYear} Blazz Showcase • Fabian Mendoza. Todos los derechos reservados.</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    padding-bottom: 3rem;
+    margin-top: 5rem;
+  }
+
+  .footer-content {
+    padding: 2rem 3rem;
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+    border-radius: 999px;
+  }
+
+  .footer-bottom {
+    font-size: 0.875rem;
+    color: hsl(var(--text-muted) / 0.7);
+    font-weight: 500;
+  }
+
+  @media (max-width: 640px) {
+    .footer-content {
+      border-radius: 2rem;
+    }
+  }
+</style>

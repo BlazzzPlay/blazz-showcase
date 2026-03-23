@@ -1,0 +1,190 @@
+---
+const projects = [
+  {
+    title: 'EduCal Chile',
+    description: 'Plataforma digital integral que transforma el trabajo docente a través de soluciones intuitivas para la gestión educativa y evaluación curricular.',
+    image: '/projects/project1.png',
+    tags: ['React', 'TypeScript', 'Vercel', 'SaaS', 'EdTech'],
+    link: 'https://educal-chile.vercel.app/',
+    badge: 'Producción'
+  },
+  {
+    title: 'E-commerce Moderno',
+    description: 'Solución de comercio electrónico con enfoque en velocidad y experiencia de usuario (UX), integrada con pasarelas de pago y gestión de stock.',
+    image: '/projects/project2.png',
+    tags: ['Next.js', 'Stripe', 'Tailwind', 'Node.js'],
+    link: '#',
+    badge: 'Concepto'
+  }
+];
+---
+
+<section id="proyectos" class="projects">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Trabajo <span class="gradient-text gradient-primary">Destacado</span></h2>
+      <p class="section-description">Una muestra de las soluciones digitales que he desarrollado recientemente.</p>
+    </div>
+    
+    <div class="projects-grid">
+      {projects.map(project => (
+        <div class="project-card glass">
+          <div class="project-image">
+            <img src={project.image} alt={project.title} loading="lazy" />
+            <div class="badge-overlay">{project.badge}</div>
+            <div class="project-overlay">
+              <a href={project.link} target="_blank" rel="noopener noreferrer" class="btn btn-primary">Ver Proyecto</a>
+            </div>
+          </div>
+          <div class="project-info">
+             <div class="project-tags">
+               {project.tags.map(tag => (
+                 <span class="tag">{tag}</span>
+               ))}
+             </div>
+             <h3 class="project-title">{project.title}</h3>
+             <p class="project-description">{project.description}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .projects {
+    padding: 10rem 0;
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 5rem;
+  }
+
+  .section-title {
+    font-size: clamp(2.5rem, 6vw, 3.5rem);
+    margin-bottom: 1.5rem;
+  }
+
+  .section-description {
+    color: hsl(var(--text-muted));
+    font-size: 1.125rem;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 3rem;
+  }
+
+  .project-card {
+    overflow: hidden;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    border-radius: 1.5rem;
+  }
+
+  .project-card:hover {
+    transform: translateY(-10px);
+    border-color: hsl(var(--primary) / 0.5);
+  }
+
+  .project-image {
+    position: relative;
+    aspect-ratio: 16/9;
+    overflow: hidden;
+  }
+
+  .project-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+  }
+
+  .project-card:hover .project-image img {
+    transform: scale(1.1);
+  }
+
+  .badge-overlay {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 5;
+    background: hsla(1189, 74%, 43%, 0.85); /* Teal accent from design */
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 99px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    backdrop-filter: blur(4px);
+  }
+
+  .project-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .project-card:hover .project-overlay {
+    opacity: 1;
+  }
+
+  .project-info {
+    padding: 2rem;
+  }
+
+  .project-tags {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.25rem 0.75rem;
+    background: hsl(var(--primary) / 0.1);
+    color: hsl(var(--primary-light));
+    border: 1px solid hsla(var(--primary) / 0.2);
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .project-title {
+    font-size: 1.75rem;
+    margin-bottom: 1rem;
+    font-family: var(--font-display);
+    font-weight: 700;
+  }
+
+  .project-description {
+    color: hsl(var(--text-muted));
+    line-height: 1.6;
+    font-size: 1rem;
+  }
+
+  .gradient-text.gradient-primary {
+    background: linear-gradient(135deg, hsl(var(--primary-light)), hsl(var(--accent)));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  @media (max-width: 640px) {
+    .projects-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

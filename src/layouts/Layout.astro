@@ -1,0 +1,224 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+  image?: string;
+}
+
+const { 
+  title, 
+  description = "Portafolio profesional de Fabian Mendoza (Blazz). Ingeniero en Informática con más de 10 años de experiencia creando soluciones digitales innovadoras en el sector EdTech y SaaS.",
+  image = "/projects/project1.png" // Default image for OG tags
+} = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, "https://blazz.cl");
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    
+    <!-- Primarias SEO -->
+    <title>{title} | Fabian Mendoza - Creative Developer</title>
+    <meta name="title" content={`${title} | Fabian Mendoza - Creative Developer`} />
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={Astro.url} />
+    <meta property="og:title" content={`${title} | Fabian Mendoza`} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={new URL(image, Astro.url)} />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content={Astro.url} />
+    <meta property="twitter:title" content={`${title} | Fabian Mendoza`} />
+    <meta property="twitter:description" content={description} />
+    <meta property="twitter:image" content={new URL(image, Astro.url)} />
+
+    <!-- Google Fonts: Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <div class="background-wrapper">
+      <div class="bg-blob blob-1"></div>
+      <div class="bg-blob blob-2"></div>
+      <div class="bg-blob blob-3"></div>
+    </div>
+    
+    <slot />
+
+    <style is:global>
+      :root {
+        --primary: 263 70% 50%;
+        --primary-light: 262 83% 58%;
+        --accent: 316 73% 52%;
+        --accent-light: 189 74% 43%;
+        
+        --background: 224 71% 4%;
+        --text: 210 40% 98%;
+        --text-muted: 215 20% 65%;
+        --glass: hsla(224, 71%, 10%, 0.4);
+        --glass-border: hsla(224, 71%, 100%, 0.1);
+        
+        --font-main: 'Inter', sans-serif;
+        --font-display: 'Outfit', sans-serif;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+        background-color: hsl(var(--background));
+        color: hsl(var(--text));
+        font-family: var(--font-main);
+      }
+
+      body {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      h1, h2, h3, h4, h5, h6 {
+        font-family: var(--font-display);
+        line-height: 1.1;
+      }
+
+      a {
+        text-decoration: none;
+        color: inherit;
+        transition: all 0.2s ease;
+      }
+
+      .background-wrapper {
+        position: fixed;
+        width: 100vw;
+        height: 100vh;
+        top: 0;
+        left: 0;
+        z-index: -1;
+        overflow: hidden;
+        pointer-events: none;
+      }
+
+      .bg-blob {
+        position: absolute;
+        filter: blur(80px);
+        opacity: 0.15;
+        border-radius: 50%;
+        animation: float 20s infinite alternate;
+      }
+
+      .blob-1 {
+        width: 50vw;
+        height: 50vw;
+        background: hsl(var(--primary));
+        top: -10%;
+        left: -10%;
+      }
+
+      .blob-2 {
+        width: 40vw;
+        height: 40vw;
+        background: hsl(var(--accent));
+        bottom: -5%;
+        right: -5%;
+        animation-delay: -5s;
+      }
+
+      .blob-3 {
+        width: 30vw;
+        height: 30vw;
+        background: hsl(var(--accent-light));
+        top: 40%;
+        left: 40%;
+        animation-delay: -10s;
+      }
+
+      @keyframes float {
+        0% { transform: translate(0, 0) scale(1); }
+        33% { transform: translate(50px, -50px) scale(1.1); }
+        66% { transform: translate(-30px, 40px) scale(0.9); }
+        100% { transform: translate(0, 0) scale(1); }
+      }
+
+      .glass {
+        background: var(--glass);
+        backdrop-filter: blur(12px);
+        border: 1px solid var(--glass-border);
+        border-radius: 1rem;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        font-family: var(--font-display);
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-light)));
+        color: white;
+        box-shadow: 0 4px 20px -5px hsl(var(--primary) / 0.5);
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px -5px hsl(var(--primary) / 0.7);
+      }
+
+      .btn-outline {
+        border: 1px solid var(--glass-border);
+        color: hsl(var(--text));
+        background: var(--glass);
+      }
+
+      .btn-outline:hover {
+        border-color: hsl(var(--primary));
+        transform: translateY(-2px);
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+      }
+
+      .gradient-text {
+        background: linear-gradient(135deg, hsl(var(--primary-light)) 30%, hsl(var(--accent)));
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      
+      .section-padding {
+        padding: 8rem 0;
+      }
+
+      .section-title {
+        font-size: clamp(2.5rem, 5vw, 3.5rem);
+        margin-bottom: 2rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+    </style>
+  </body>
+</html>

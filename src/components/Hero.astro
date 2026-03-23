@@ -1,0 +1,145 @@
+---
+---
+<section id="inicio" class="hero">
+  <div class="container hero-content">
+    <div class="hero-text">
+       <div class="badge-wrapper glass">
+         <span class="badge-dot"></span>
+         <span class="badge-text">Ingeniero en Informática • +10 años de experiencia</span>
+       </div>
+       <h1 class="hero-title">
+          Fabian <span class="gradient-text gradient-primary">Mendoza</span>
+          <br />
+          <span class="sub-title">Innovación y <span class="gradient-text">Desarrollo</span> Digital</span>
+       </h1>
+       <p class="hero-description">
+         Apasionado por las nuevas tecnologías y plataformas de desarrollo. Creando soluciones digitales que transforman la educación.
+       </p>
+       <div class="hero-actions">
+         <a href="#proyectos" class="btn btn-primary">Ver Proyectos</a>
+         <a href="https://github.com/BlazzzPlay" target="_blank" rel="noopener noreferrer" class="btn btn-outline">
+           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="github-icon"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+           GitHub
+         </a>
+       </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    padding-top: 10rem;
+    padding-bottom: 5rem;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+  }
+
+  .hero-content {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    max-width: 1000px;
+    z-index: 10;
+  }
+
+  .badge-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1.25rem;
+    border-radius: 999px;
+    margin-bottom: 2rem;
+    animation: fadeIn 0.8s ease-out;
+  }
+
+  .badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: hsl(var(--accent-light));
+    box-shadow: 0 0 10px hsl(var(--accent-light) / 0.5);
+    animation: pulse 2s infinite;
+  }
+
+  .badge-text {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: hsl(var(--text-muted));
+  }
+
+  .hero-title {
+    font-size: clamp(3rem, 10vw, 6rem);
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+    animation: slideUpFade 0.8s 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  
+  .sub-title {
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    display: block;
+    margin-top: 1rem;
+    font-weight: 600;
+  }
+
+  .gradient-text.gradient-primary {
+    background: linear-gradient(135deg, hsl(var(--primary-light)), hsl(var(--accent)));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .hero-description {
+    font-size: clamp(1.125rem, 3vw, 1.25rem);
+    color: hsl(var(--text-muted));
+    margin-bottom: 3rem;
+    line-height: 1.6;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    animation: slideUpFade 0.8s 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    animation: slideUpFade 0.8s 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .hero-actions .btn {
+      padding: 1rem 2.5rem;
+      font-size: 1rem;
+      gap: 0.75rem;
+  }
+
+  .github-icon {
+    opacity: 0.8;
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.4); opacity: 0.5; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  @keyframes slideUpFade {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @media (max-width: 768px) {
+    .hero {
+      padding-top: 8rem;
+    }
+  }
+</style>
