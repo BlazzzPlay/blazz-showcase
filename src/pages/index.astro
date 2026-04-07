@@ -19,7 +19,7 @@ const stats = [
 		<Hero />
 		<Projects />
 		
-		<section id="sobre-mi" class="about section-padding">
+		<section id="sobre-mi" class="about section-padding" data-animate="fade-up">
 			<div class="container">
 				<div class="glass about-content">
 					<div class="about-header text-center">
@@ -46,7 +46,7 @@ const stats = [
 			</div>
 		</section>
 
-		<section id="contacto" class="contact section-padding">
+		<section id="contacto" class="contact section-padding" data-animate="fade-up">
 			<div class="container">
 				<div class="glass contact-content max-w-4xl mx-auto">
 					<div class="contact-header text-center mb-10">
@@ -76,9 +76,13 @@ const stats = [
 						</div>
 						
 						<div class="form-actions">
-							<button type="submit" class="btn btn-primary btn-large w-full">Registrar Solicitud</button>
+							<button type="submit" class="btn btn-primary btn-large w-full relative">
+								<span class="btn-text">Registrar Solicitud</span>
+								<span class="btn-spinner hidden">
+									<svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+								</span>
+							</button>
 						</div>
-						<div id="form-message" class="form-status hidden"></div>
 					</form>
 				</div>
 			</div>
@@ -87,41 +91,56 @@ const stats = [
 	<Footer />
 </Layout>
 
+<div id="toast-container" class="toast-container"></div>
+
 <script>
 	import { actions } from 'astro:actions';
 
 	const form = document.querySelector('#contact-form') as HTMLFormElement;
-	const statusMsg = document.querySelector('#form-message') as HTMLElement;
+	const toastContainer = document.querySelector('#toast-container') as HTMLElement;
+
+	function showToast(message: string, type: 'success' | 'error') {
+		const toast = document.createElement('div');
+		toast.className = `toast toast-${type} glass`;
+		toast.innerText = message;
+		toastContainer.appendChild(toast);
+		
+		setTimeout(() => toast.classList.add('show'), 10);
+		
+		setTimeout(() => {
+			toast.classList.remove('show');
+			setTimeout(() => toast.remove(), 300);
+		}, 5000);
+	}
 
 	form?.addEventListener('submit', async (e) => {
 		e.preventDefault();
 		const formData = new FormData(form);
 		
-		// Visual feedback
 		const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
-		const originalText = submitBtn.innerText;
-		submitBtn.innerText = 'Enviando...';
+		const btnText = submitBtn.querySelector('.btn-text') as HTMLElement;
+		const btnSpinner = submitBtn.querySelector('.btn-spinner') as HTMLElement;
+		
+		btnText.classList.add('hidden');
+		btnSpinner.classList.remove('hidden');
 		submitBtn.disabled = true;
 
 		try {
 			const { data, error } = await actions.submitContact(formData);
 			
-			statusMsg.classList.remove('hidden', 'success', 'error');
-			
 			if (error) {
-				statusMsg.innerText = error.message || 'Error al enviar.';
-				statusMsg.classList.add('error');
+				showToast(error.message || 'Error de validación. Revisa los campos.', 'error');
 			} else if (data?.success) {
-				statusMsg.innerText = data.message;
-				statusMsg.classList.add('success');
+				showToast(data.message, 'success');
 				form.reset();
+			} else {
+				showToast('Error desconocido.', 'error');
 			}
 		} catch (e) {
-			statusMsg.innerText = 'Error crítico en el servidor.';
-			statusMsg.classList.add('error');
-			statusMsg.classList.remove('hidden');
+			showToast('Error crítico en el servidor.', 'error');
 		} finally {
-			submitBtn.innerText = originalText;
+			btnText.classList.remove('hidden');
+			btnSpinner.classList.add('hidden');
 			submitBtn.disabled = false;
 		}
 	});
@@ -242,29 +261,6 @@ const stats = [
 		background: hsla(224, 71%, 15%, 0.6);
 	}
 
-	.form-status {
-		margin-top: 1rem;
-		padding: 1rem;
-		border-radius: 0.75rem;
-		font-size: 0.9rem;
-		font-weight: 600;
-		text-align: center;
-	}
-	
-	.form-status.success {
-		background: hsla(1189, 74%, 43%, 0.2);
-		color: hsl(1189, 74%, 43%);
-		border: 1px solid hsla(1189, 74%, 43%, 0.3);
-	}
-
-	.form-status.error {
-		background: hsla(0, 84%, 60%, 0.2);
-		color: hsl(0, 84%, 60%);
-		border: 1px solid hsla(0, 84%, 60%, 0.3);
-	}
-
-	.hidden {
-		display: none;
 	}
 
 	.btn-large {
@@ -272,8 +268,56 @@ const stats = [
 		font-size: 1.1rem;
 	}
 
+	.relative {
+		position: relative;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+
 	.w-full {
 		width: 100%;
+	}
+
+	.animate-spin {
+		animation: spin 1s linear infinite;
+	}
+
+	@keyframes spin {
+		from { transform: rotate(0deg); }
+		to { transform: rotate(360deg); }
+	}
+
+	.toast-container {
+		position: fixed;
+		bottom: 2rem;
+		right: 2rem;
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		z-index: 1000;
+	}
+
+	.toast {
+		padding: 1rem 1.5rem;
+		border-radius: 0.75rem;
+		font-size: 0.95rem;
+		font-weight: 500;
+		transform: translateX(120%);
+		transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+		box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+	}
+
+	.toast.show {
+		transform: translateX(0);
+	}
+
+	.toast-success {
+		border-left: 4px solid hsl(1189, 74%, 43%);
+	}
+
+	.toast-error {
+		border-left: 4px solid hsl(0, 84%, 60%);
 	}
 
 	@media (max-width: 768px) {

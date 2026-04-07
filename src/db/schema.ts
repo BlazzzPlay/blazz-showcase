@@ -6,5 +6,6 @@ export const contactRequests = sqliteTable('contact_requests', {
   email: text('email').notNull(),
   subject: text('subject').notNull(),
   message: text('message').notNull(),
+  isRead: integer('is_read', { mode: 'boolean' }).default(false),
   createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 });

@@ -17,6 +17,13 @@ sqlite.exec(`
     email TEXT NOT NULL,
     subject TEXT NOT NULL,
     message TEXT NOT NULL,
+    is_read INTEGER DEFAULT 0,
     created_at INTEGER
   )
 `);
+
+try {
+  sqlite.exec('ALTER TABLE contact_requests ADD COLUMN is_read INTEGER DEFAULT 0');
+} catch (e) {
+  // Column might already exist, ignore error
+}

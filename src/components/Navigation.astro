@@ -18,10 +18,55 @@ const navItems = [
       ))}
     </ul>
     <div class="nav-action">
-      <a href="#contacto" class="btn btn-primary">Contáctame</a>
+      <a href="#contacto" class="btn btn-primary d-none-mobile">Contáctame</a>
+      <button class="mobile-menu-btn" aria-label="Toggle menu">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+      </button>
     </div>
   </div>
+
+  <div class="mobile-menu glass">
+    <ul class="mobile-nav-links">
+      {navItems.map(item => (
+        <li><a href={item.href}>{item.name}</a></li>
+      ))}
+      <li><a href="#contacto" class="gradient-text">Contáctame</a></li>
+    </ul>
+  </div>
 </nav>
+
+<script>
+  // Dynamic Navbar on Scroll
+  const nav = document.querySelector('.nav') as HTMLElement;
+  const navContent = document.querySelector('.nav-content') as HTMLElement;
+  
+  if (nav && navContent) {
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 50) {
+        navContent.classList.add('scrolled');
+      } else {
+        navContent.classList.remove('scrolled');
+      }
+    }, { passive: true });
+  }
+
+  // Mobile Menu Toggle
+  const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+  const mobileMenu = document.querySelector('.mobile-menu');
+  const mobileLinks = document.querySelectorAll('.mobile-nav-links a');
+
+  if (mobileMenuBtn && mobileMenu) {
+    mobileMenuBtn.addEventListener('click', () => {
+      mobileMenu.classList.toggle('active');
+    });
+
+    mobileLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        mobileMenu.classList.remove('active');
+      });
+    });
+  }
+</script>
 
 <style>
   .nav {
@@ -41,6 +86,14 @@ const navItems = [
     padding: 0.75rem 2rem;
     border-radius: 999px;
     max-width: 900px;
+    transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .nav-content.scrolled {
+    background: hsla(224, 71%, 4%, 0.85);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+    border-color: hsla(var(--primary-light) / 0.3);
   }
 
   .logo h1 {
@@ -80,8 +133,67 @@ const navItems = [
   }
 
   @media (max-width: 768px) {
-    .nav-links {
+    .nav-links, .d-none-mobile {
       display: none;
     }
+
+    .mobile-menu-btn {
+      display: block;
+    }
+
+    .mobile-menu {
+      display: block;
+    }
+  }
+
+  .mobile-menu-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: hsl(var(--text));
+    cursor: pointer;
+    padding: 0.5rem;
+  }
+
+  .mobile-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 1rem;
+    right: 1rem;
+    padding: 1.5rem;
+    border-radius: 1.5rem;
+    margin-top: 0.5rem;
+    opacity: 0;
+    transform: translateY(-10px);
+    pointer-events: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  }
+
+  .mobile-menu.active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: all;
+  }
+
+  .mobile-nav-links {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    text-align: center;
+  }
+
+  .mobile-nav-links a {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: hsl(var(--text-muted));
+    display: block;
+    padding: 0.5rem;
+  }
+
+  .mobile-nav-links a:hover, .mobile-nav-links a.gradient-text {
+    color: hsl(var(--text));
   }
 </style>

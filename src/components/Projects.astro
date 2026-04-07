@@ -19,7 +19,7 @@ const projects = [
 ];
 ---
 
-<section id="proyectos" class="projects">
+<section id="proyectos" class="projects" data-animate="fade-up">
   <div class="container">
     <div class="section-header">
       <h2 class="section-title">Trabajo <span class="gradient-text gradient-primary">Destacado</span></h2>
@@ -81,21 +81,40 @@ const projects = [
 
   .project-card {
     overflow: hidden;
-    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
     display: flex;
     flex-direction: column;
     border-radius: 1.5rem;
+    position: relative;
+  }
+
+  .project-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border-radius: inherit;
+    background: radial-gradient(800px circle at var(--mouse-x, 0) var(--mouse-y, 0), hsla(var(--primary-light), 0.1), transparent 40%);
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
   }
 
   .project-card:hover {
     transform: translateY(-10px);
     border-color: hsl(var(--primary) / 0.5);
+    box-shadow: 0 10px 40px -10px hsl(var(--primary) / 0.3);
+  }
+
+  .project-card:hover::before {
+    opacity: 1;
   }
 
   .project-image {
     position: relative;
     aspect-ratio: 16/9;
     overflow: hidden;
+    z-index: 2;
   }
 
   .project-image img {
@@ -141,6 +160,8 @@ const projects = [
 
   .project-info {
     padding: 2rem;
+    position: relative;
+    z-index: 2;
   }
 
   .project-tags {
