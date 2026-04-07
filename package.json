@@ -14,12 +14,11 @@
   },
   "dependencies": {
     "@astrojs/node": "^10.0.3",
+    "@libsql/client": "^0.17.2",
     "astro": "^6.0.8",
-    "better-sqlite3": "^12.8.0",
     "drizzle-orm": "^0.45.1"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.6.13",
     "drizzle-kit": "^0.31.10"
   }
 }

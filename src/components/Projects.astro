@@ -1,20 +1,15 @@
 ---
+import { Image } from 'astro:assets';
+import educalImg from '../assets/projects/educal.png';
+
 const projects = [
   {
     title: 'EduCal Chile',
     description: 'Plataforma digital integral que transforma el trabajo docente a través de soluciones intuitivas para la gestión educativa y evaluación curricular.',
-    image: '/projects/project1.png',
+    image: educalImg,
     tags: ['React', 'TypeScript', 'Vercel', 'SaaS', 'EdTech'],
     link: 'https://educal-chile.vercel.app/',
     badge: 'Producción'
-  },
-  {
-    title: 'E-commerce Moderno',
-    description: 'Solución de comercio electrónico con enfoque en velocidad y experiencia de usuario (UX), integrada con pasarelas de pago y gestión de stock.',
-    image: '/projects/project2.png',
-    tags: ['Next.js', 'Stripe', 'Tailwind', 'Node.js'],
-    link: '#',
-    badge: 'Concepto'
   }
 ];
 ---
@@ -30,7 +25,7 @@ const projects = [
       {projects.map(project => (
         <div class="project-card glass">
           <div class="project-image">
-            <img src={project.image} alt={project.title} loading="lazy" />
+            <Image src={project.image} alt={project.title} loading="lazy" width={800} height={450} />
             <div class="badge-overlay">{project.badge}</div>
             <div class="project-overlay">
               <a href={project.link} target="_blank" rel="noopener noreferrer" class="btn btn-primary">Ver Proyecto</a>
