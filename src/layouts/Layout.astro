@@ -8,7 +8,7 @@ interface Props {
 const { 
   title, 
   description = "Portafolio profesional de Fabian Mendoza (Blazz). Ingeniero en Informática con más de 10 años de experiencia creando soluciones digitales innovadoras en el sector EdTech y SaaS.",
-  image = "/projects/project1.png" // Default image for OG tags
+  image = "/projects/project1.webp" // Default image for OG tags
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, "https://blazz.cl");
@@ -22,36 +22,75 @@ const canonicalURL = new URL(Astro.url.pathname, "https://blazz.cl");
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     
-    <!-- Primarias SEO -->
+    <!-- SEO Primario -->
     <title>{title} | Fabian Mendoza - Creative Developer</title>
     <meta name="title" content={`${title} | Fabian Mendoza - Creative Developer`} />
     <meta name="description" content={description} />
+    <meta name="keywords" content="Fabian Mendoza, Blazz, Ingeniero Informático, Desarrollo SaaS, EdTech, React, TypeScript, Transformación Digital, Portafolio, Chile, Creative Developer, Jefe de Informática, Colegio Montessori, EduCal" />
+    <meta name="author" content="Fabian Mendoza" />
+    <meta name="robots" content="index, follow" />
+    <meta name="language" content="Spanish" />
+    <meta name="revisit-after" content="7 days" />
     <link rel="canonical" href={canonicalURL} />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content={Astro.url} />
+    <meta property="og:url" content={canonicalURL} />
     <meta property="og:title" content={`${title} | Fabian Mendoza`} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content={new URL(image, Astro.url)} />
+    <meta property="og:image" content={`https://blazz.cl${image}`} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:site_name" content="Fabian Mendoza - Creative Developer" />
+    <meta property="og:locale" content="es_CL" />
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content={Astro.url} />
+    <meta property="twitter:url" content={canonicalURL} />
     <meta property="twitter:title" content={`${title} | Fabian Mendoza`} />
     <meta property="twitter:description" content={description} />
-    <meta property="twitter:image" content={new URL(image, Astro.url)} />
+    <meta property="twitter:image" content={`https://blazz.cl${image}`} />
+    <meta property="twitter:creator" content="@BlazzzPlay" />
 
-    <!-- JSON-LD Structured Data -->
+    <!-- JSON-LD Structured Data: Person -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@type": "Person",
         "name": "Fabian Mendoza",
+        "alternateName": "Blazz",
         "url": "https://blazz.cl",
+        "image": "https://blazz.cl/projects/project1.webp",
         "jobTitle": "Jefe de Informática & Creative Developer",
-        "alumniOf": "Ingeniero en Informática",
-        "knowsAbout": ["Desarrollo SaaS", "EdTech", "React", "TypeScript", "Transformación Digital"]
+        "description": {description},
+        "alumniOf": {
+          "@type": "EducationalOrganization",
+          "name": "Ingeniero en Informática"
+        },
+        "knowsAbout": ["Desarrollo SaaS", "EdTech", "React", "TypeScript", "Transformación Digital", "Node.js"],
+        "sameAs": [
+          "https://github.com/BlazzzPlay"
+        ],
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "CL"
+        }
+      }
+    </script>
+
+    <!-- JSON-LD Structured Data: WebSite -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Fabian Mendoza - Creative Developer",
+        "url": "https://blazz.cl",
+        "description": "Portafolio profesional de Fabian Mendoza (Blazz). Ingeniero en Informática con más de 10 años de experiencia.",
+        "inLanguage": "es",
+        "publisher": {
+          "@type": "Person",
+          "name": "Fabian Mendoza"
+        }
       }
     </script>
 
