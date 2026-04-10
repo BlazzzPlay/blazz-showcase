@@ -7,12 +7,13 @@ export const server = {
   submitContact: defineAction({
     accept: 'form',
     input: z.object({
-      name: z.string().min(2, "El nombre es muy corto"),
-      email: z.string().email("Email inválido"),
-      subject: z.string().min(3, "Asunto requerido"),
-      message: z.string().min(10, "Mensajes cortos no permitidos"),
-    }),
+      name: z.string().trim().min(2, "El nombre es muy corto"),
+      email: z.string().trim().email("Email inválido"),
+      subject: z.string().trim().min(3, "Asunto requerido"),
+      message: z.string().trim().min(10, "Mensajes cortos no permitidos"),
+    }).passthrough(),
     handler: async (values) => {
+      console.log('📩 Contact form received:', JSON.stringify(values));
       try {
         await db.insert(contactRequests).values({
           name: values.name,
