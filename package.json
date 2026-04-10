@@ -9,7 +9,8 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview",
+    "preview": "astro preview --host",
+    "start": "node dist/server/entry.mjs",
     "astro": "astro"
   },
   "dependencies": {
