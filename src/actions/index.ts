@@ -27,4 +27,31 @@ export const server = {
       }
     },
   }),
+
+  markAsRead: defineAction({
+    accept: 'form',
+    input: z.object({
+      id: z.string(),
+    }),
+    handler: async (values) => {
+      const { eq } = await import('drizzle-orm');
+      await db.update(contactRequests)
+        .set({ isRead: true })
+        .where(eq(contactRequests.id, parseInt(values.id)));
+      return { success: true };
+    },
+  }),
+
+  deleteContact: defineAction({
+    accept: 'form',
+    input: z.object({
+      id: z.string(),
+    }),
+    handler: async (values) => {
+      const { eq } = await import('drizzle-orm');
+      await db.delete(contactRequests)
+        .where(eq(contactRequests.id, parseInt(values.id)));
+      return { success: true };
+    },
+  }),
 };

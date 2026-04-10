@@ -10,6 +10,10 @@ export default defineConfig({
     host: true,
     port: 4321,
   },
+  // Cloudflare handles security; Astro's CSRF blocks cross-tunnel requests
+  security: {
+    checkOrigin: false,
+  },
   adapter: node({
     mode: 'standalone',
   }),

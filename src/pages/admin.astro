@@ -1,0 +1,257 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { db } from '../db';
+import { contactRequests } from '../db/schema';
+import { desc, eq } from 'drizzle-orm';
+
+// Fetch all contacts, newest first
+const contacts = await db.select().from(contactRequests).orderBy(desc(contactRequests.createdAt));
+const unreadCount = contacts.filter(c => !c.isRead).length;
+
+// Simple auth via query param (lab environment)
+const token = Astro.url.searchParams.get('key');
+const ADMIN_KEY = 'blazz2026';
+if (token !== ADMIN_KEY) {
+  return Astro.redirect('/');
+}
+---
+
+<Layout title="Admin Panel">
+  <section class="admin section-padding">
+    <div class="container">
+      <div class="admin-header">
+        <div>
+          <h1 class="section-title">Panel de <span class="gradient-text">Contactos</span></h1>
+          <p class="admin-subtitle">
+            {contacts.length} solicitudes totales · 
+            <span class="unread-badge">{unreadCount} sin leer</span>
+          </p>
+        </div>
+        <a href="/" class="btn btn-outline">← Volver al sitio</a>
+      </div>
+
+      {contacts.length === 0 ? (
+        <div class="empty-state glass">
+          <p>📭 No hay solicitudes de contacto todavía.</p>
+        </div>
+      ) : (
+        <div class="contacts-grid">
+          {contacts.map((contact) => (
+            <div class:list={['contact-card glass', { unread: !contact.isRead }]} data-id={contact.id}>
+              <div class="card-header">
+                <div class="card-meta">
+                  <span class:list={['status-dot', { 'dot-unread': !contact.isRead }]}></span>
+                  <strong class="card-name">{contact.name}</strong>
+                  <span class="card-date">{new Date(contact.createdAt!).toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                </div>
+                <div class="card-actions">
+                  {!contact.isRead && (
+                    <form method="POST" action={`/api/mark-read?id=${contact.id}`} style="display:inline">
+                      <button type="submit" class="btn-icon" title="Marcar como leído">✓</button>
+                    </form>
+                  )}
+                  <form method="POST" action={`/api/delete?id=${contact.id}`} style="display:inline">
+                    <button type="submit" class="btn-icon btn-danger" title="Eliminar" onclick="return confirm('¿Eliminar esta solicitud?')">✕</button>
+                  </form>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="card-field">
+                  <span class="field-label">Email:</span>
+                  <a href={`mailto:${contact.email}`} class="field-value email-link">{contact.email}</a>
+                </div>
+                <div class="card-field">
+                  <span class="field-label">Asunto:</span>
+                  <span class="field-value">{contact.subject}</span>
+                </div>
+                <div class="card-field message-field">
+                  <span class="field-label">Mensaje:</span>
+                  <p class="field-value message-text">{contact.message}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .admin-subtitle {
+    color: hsl(var(--text-muted));
+    font-size: 1.1rem;
+    margin-top: 0.5rem;
+  }
+
+  .unread-badge {
+    color: hsl(var(--accent));
+    font-weight: 600;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    font-size: 1.2rem;
+    color: hsl(var(--text-muted));
+  }
+
+  .contacts-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .contact-card {
+    padding: 1.5rem 2rem;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+  }
+
+  .contact-card.unread {
+    border-left-color: hsl(var(--accent));
+    background: hsla(224, 71%, 15%, 0.5);
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .card-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: hsl(var(--text-muted));
+  }
+
+  .dot-unread {
+    background: hsl(var(--accent));
+    box-shadow: 0 0 8px hsl(var(--accent));
+  }
+
+  .card-name {
+    font-size: 1.1rem;
+    font-family: var(--font-display);
+  }
+
+  .card-date {
+    font-size: 0.8rem;
+    color: hsl(var(--text-muted));
+  }
+
+  .card-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .btn-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 0.5rem;
+    border: 1px solid var(--glass-border);
+    background: transparent;
+    color: hsl(var(--text-muted));
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+  }
+
+  .btn-icon:hover {
+    border-color: hsl(var(--accent-light));
+    color: hsl(var(--accent-light));
+    background: hsla(189, 74%, 43%, 0.1);
+  }
+
+  .btn-danger:hover {
+    border-color: hsl(0, 84%, 60%);
+    color: hsl(0, 84%, 60%);
+    background: hsla(0, 84%, 60%, 0.1);
+  }
+
+  .card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .card-field {
+    display: flex;
+    gap: 0.5rem;
+    align-items: baseline;
+  }
+
+  .field-label {
+    font-size: 0.8rem;
+    color: hsl(var(--text-muted));
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    min-width: 70px;
+    flex-shrink: 0;
+  }
+
+  .field-value {
+    color: hsl(var(--text));
+    font-size: 0.95rem;
+  }
+
+  .email-link {
+    color: hsl(var(--primary-light));
+  }
+
+  .email-link:hover {
+    text-decoration: underline;
+  }
+
+  .message-field {
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .message-text {
+    line-height: 1.6;
+    color: hsl(var(--text-muted));
+    white-space: pre-wrap;
+  }
+
+  @media (max-width: 768px) {
+    .admin-header {
+      flex-direction: column;
+    }
+
+    .contact-card {
+      padding: 1rem 1.25rem;
+    }
+
+    .card-field {
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .field-label {
+      min-width: auto;
+    }
+  }
+</style>
