@@ -7,10 +7,10 @@ export const server = {
   submitContact: defineAction({
     accept: 'form',
     input: z.object({
-      name: z.string().trim().min(2, "El nombre es muy corto"),
-      email: z.string().trim().email("Email inválido"),
-      subject: z.string().trim().min(3, "Asunto requerido"),
-      message: z.string().trim().min(10, "Mensajes cortos no permitidos"),
+      name: z.string().trim().min(2, "😊 Cuéntame tu nombre, ¡me gusta saber con quién hablo!"),
+      email: z.string().trim().email("📧 Hmm, ese email no parece válido. ¿Podrías revisarlo?"),
+      subject: z.string().trim().min(3, "💡 Dame una pista de qué se trata tu proyecto"),
+      message: z.string().trim().min(10, "🤝 Ten confianza, ¡explícame tu idea con más detalle! Así te puedo ayudar mejor."),
     }).passthrough(),
     handler: async (values) => {
       console.log('📩 Contact form received:', JSON.stringify(values));

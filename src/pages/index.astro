@@ -126,14 +126,9 @@ const stats = [
 		submitBtn.disabled = true;
 
 	try {
-		// Debug: log what we're sending
-		for (const [key, val] of formData.entries()) {
-			console.log(`[form] ${key}: "${val}" (${(val as string).length} chars)`);
-		}
 		const { data, error } = await actions.submitContact(formData);
 		
 		if (error) {
-			console.error('[form] Validation error:', JSON.stringify(error));
 			showToast(error.message || 'Error de validación. Revisa los campos.', 'error');
 		} else if (data?.success) {
 				showToast(data.message, 'success');
