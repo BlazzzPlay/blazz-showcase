@@ -11,7 +11,13 @@
     "build": "astro build",
     "preview": "astro preview --host",
     "start": "node dist/server/entry.mjs",
-    "astro": "astro"
+    "astro": "astro",
+    "typecheck": "tsc --noEmit",
+    "quality:assert-lighthouse": "node scripts/assert-lighthouse.mjs",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:report": "playwright show-report"
   },
   "dependencies": {
     "@astrojs/node": "^10.0.3",
@@ -21,6 +27,8 @@
     "drizzle-orm": "^0.45.1"
   },
   "devDependencies": {
-    "drizzle-kit": "^0.31.10"
+    "@playwright/test": "^1.54.2",
+    "drizzle-kit": "^0.31.10",
+    "typescript": "^5.9.3"
   }
 }
