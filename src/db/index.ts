@@ -34,6 +34,16 @@ export const db = drizzle(client, { schema });
     } catch (e) {
       // Column might already exist, ignore error
     }
+
+    await client.execute(`
+      CREATE TABLE IF NOT EXISTS contact_funnel_events (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        session_id TEXT NOT NULL,
+        event TEXT NOT NULL,
+        source TEXT NOT NULL DEFAULT 'contact_form',
+        created_at INTEGER
+      )
+    `);
   } catch (err) {
     console.error("DB Init Error:", err);
   }

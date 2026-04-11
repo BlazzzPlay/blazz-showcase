@@ -7,7 +7,7 @@ const navItems = [
 ];
 ---
 
-<nav class="nav">
+<nav class="nav" aria-label="Navegación principal">
   <div class="container nav-content glass">
     <div class="logo">
       <h1 class="gradient-text">Blazz</h1>
@@ -18,19 +18,19 @@ const navItems = [
       ))}
     </ul>
     <div class="nav-action">
-      <a href="#contacto" class="btn btn-primary d-none-mobile">Contáctame</a>
-      <button class="mobile-menu-btn" aria-label="Toggle menu">
+      <a href="#contacto" class="btn btn-primary d-none-mobile" data-track-cta="nav">Contáctame</a>
+      <button class="mobile-menu-btn" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobile-menu" aria-haspopup="true">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
       </button>
     </div>
   </div>
 
-  <div class="mobile-menu glass">
+  <div class="mobile-menu glass" id="mobile-menu" aria-hidden="true" hidden>
     <ul class="mobile-nav-links">
       {navItems.map(item => (
         <li><a href={item.href}>{item.name}</a></li>
       ))}
-      <li><a href="#contacto" class="gradient-text">Contáctame</a></li>
+      <li><a href="#contacto" class="gradient-text" data-track-cta="nav">Contáctame</a></li>
     </ul>
   </div>
 </nav>
@@ -51,19 +51,93 @@ const navItems = [
   }
 
   // Mobile Menu Toggle
-  const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
-  const mobileMenu = document.querySelector('.mobile-menu');
-  const mobileLinks = document.querySelectorAll('.mobile-nav-links a');
+  const mobileMenuBtn = document.querySelector('.mobile-menu-btn') as HTMLButtonElement | null;
+  const mobileMenu = document.querySelector('.mobile-menu') as HTMLElement | null;
+  const mobileLinks = Array.from(document.querySelectorAll('.mobile-nav-links a')) as HTMLAnchorElement[];
+  const navCtas = Array.from(document.querySelectorAll('[data-track-cta="nav"]')) as HTMLAnchorElement[];
+
+  const emitNavCtaClick = () => {
+    window.dispatchEvent(
+      new CustomEvent('portfolio:funnel', {
+        detail: { event: 'cta_click', source: 'nav' }
+      })
+    );
+  };
+
+  navCtas.forEach((cta) => cta.addEventListener('click', emitNavCtaClick));
+
+  const setMobileLinksTabIndex = (isOpen: boolean) => {
+    mobileLinks.forEach((link) => {
+      link.tabIndex = isOpen ? 0 : -1;
+    });
+  };
+
+  let focusedBeforeOpen: HTMLElement | null = null;
+
+  const closeMenu = () => {
+    if (!mobileMenu || !mobileMenuBtn) return;
+
+    mobileMenu.classList.remove('active');
+    mobileMenu.setAttribute('aria-hidden', 'true');
+    mobileMenu.hidden = true;
+    mobileMenuBtn.setAttribute('aria-expanded', 'false');
+    mobileMenuBtn.setAttribute('aria-label', 'Abrir menú');
+    setMobileLinksTabIndex(false);
+    focusedBeforeOpen?.focus();
+  };
+
+  const openMenu = () => {
+    if (!mobileMenu || !mobileMenuBtn) return;
+
+    focusedBeforeOpen = document.activeElement as HTMLElement;
+    mobileMenu.hidden = false;
+    mobileMenu.classList.add('active');
+    mobileMenu.setAttribute('aria-hidden', 'false');
+    mobileMenuBtn.setAttribute('aria-expanded', 'true');
+    mobileMenuBtn.setAttribute('aria-label', 'Cerrar menú');
+    setMobileLinksTabIndex(true);
+    mobileLinks[0]?.focus();
+  };
 
   if (mobileMenuBtn && mobileMenu) {
+    setMobileLinksTabIndex(false);
+
     mobileMenuBtn.addEventListener('click', () => {
-      mobileMenu.classList.toggle('active');
+      const isOpen = mobileMenu.classList.contains('active');
+      if (isOpen) {
+        closeMenu();
+      } else {
+        openMenu();
+      }
     });
 
     mobileLinks.forEach(link => {
       link.addEventListener('click', () => {
-        mobileMenu.classList.remove('active');
+        closeMenu();
       });
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (!mobileMenu.classList.contains('active')) return;
+
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeMenu();
+      }
+
+      if (event.key === 'Tab' && mobileLinks.length > 0) {
+        const first = mobileLinks[0];
+        const last = mobileLinks[mobileLinks.length - 1];
+        const active = document.activeElement;
+
+        if (event.shiftKey && active === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && active === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
     });
   }
 </script>
@@ -132,20 +206,6 @@ const navItems = [
     to { transform: translateY(0); opacity: 1; }
   }
 
-  @media (max-width: 768px) {
-    .nav-links, .d-none-mobile {
-      display: none;
-    }
-
-    .mobile-menu-btn {
-      display: block;
-    }
-
-    .mobile-menu {
-      display: block;
-    }
-  }
-
   .mobile-menu-btn {
     display: none;
     background: none;
@@ -169,6 +229,20 @@ const navItems = [
     pointer-events: none;
     transition: all 0.3s ease;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  }
+
+  @media (max-width: 768px) {
+    .nav-links, .d-none-mobile {
+      display: none;
+    }
+
+    .mobile-menu-btn {
+      display: block;
+    }
+
+    .mobile-menu {
+      display: block;
+    }
   }
 
   .mobile-menu.active {
