@@ -33,10 +33,20 @@ Target: **SEO >=95** en mobile y desktop para cada URL objetivo.
 
 | URL | Mobile SEO | Desktop SEO | Estado |
 |---|---:|---:|---|
-| `/` | 70 (run local 2026-04-11) | 95 (run local 2026-04-11) | ⚠️ mejorar mobile |
-| `/servicios` | manual-required | manual-required | ⏳ |
-| `/portfolio` | manual-required | manual-required | ⏳ |
-| `/contacto` | manual-required | manual-required | ⏳ |
+| `/` | 92 (run local 2026-04-11) | 92 (run local 2026-04-11) | ⚠️ bajo target 95 |
+| `/servicios` | 92 (run local 2026-04-11) | 92 (run local 2026-04-11) | ⚠️ bajo target 95 |
+| `/portfolio` | 92 (run local 2026-04-11) | 92 (run local 2026-04-11) | ⚠️ bajo target 95 |
+| `/contacto` | 92 (run local 2026-04-11) | 92 (run local 2026-04-11) | ⚠️ bajo target 95 |
+
+Artifacts D0 (versionados):
+- `docs/quality/lighthouse/2026-04-11-home-mobile.json`
+- `docs/quality/lighthouse/2026-04-11-home-desktop.json`
+- `docs/quality/lighthouse/2026-04-11-servicios-mobile.json`
+- `docs/quality/lighthouse/2026-04-11-servicios-desktop.json`
+- `docs/quality/lighthouse/2026-04-11-portfolio-mobile.json`
+- `docs/quality/lighthouse/2026-04-11-portfolio-desktop.json`
+- `docs/quality/lighthouse/2026-04-11-contacto-mobile.json`
+- `docs/quality/lighthouse/2026-04-11-contacto-desktop.json`
 
 ### 3) Indexación privada
 Target: **0 URLs privadas indexadas**.
@@ -52,7 +62,7 @@ Repetir exactamente el mismo procedimiento y completar tabla comparativa:
 
 | Corte | Impresiones CL | CTR CL | Posición CL | URLs privadas indexadas | Lighthouse SEO (promedio 4 URLs) |
 |---|---:|---:|---:|---:|---:|
-| D0 | manual-required | manual-required | manual-required | 0 | manual-required |
+| D0 | manual-required | manual-required | manual-required | 0 | 92 |
 | D+30 | _pendiente_ | _pendiente_ | _pendiente_ | _pendiente_ | _pendiente_ |
 | D+60 | _pendiente_ | _pendiente_ | _pendiente_ | _pendiente_ | _pendiente_ |
 
