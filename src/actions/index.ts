@@ -1,7 +1,7 @@
 import { defineAction } from 'astro:actions';
 import { z } from 'astro:schema';
 import { db } from '../db';
-import { contactRequests } from '../db/schema';
+import { contactRequests, contactFunnelEvents } from '../db/schema';
 
 export const server = {
   submitContact: defineAction({
@@ -26,6 +26,24 @@ export const server = {
         console.error('Error saving to DB:', error);
         return { success: false, message: "Hubo un error al guardar tu solicitud. Inténtalo de nuevo." };
       }
+    },
+  }),
+
+  trackFunnel: defineAction({
+    accept: 'json',
+    input: z.object({
+      sessionId: z.string().min(8).max(64),
+      event: z.enum(['cta_click', 'form_start', 'form_submit_success']),
+      source: z.enum(['hero', 'nav', 'contact_form']).default('contact_form'),
+    }),
+    handler: async (values) => {
+      await db.insert(contactFunnelEvents).values({
+        sessionId: values.sessionId,
+        event: values.event,
+        source: values.source,
+      });
+
+      return { success: true };
     },
   }),
 

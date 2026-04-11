@@ -14,21 +14,21 @@ const projects = [
 ];
 ---
 
-<section id="proyectos" class="projects" data-animate="fade-up">
+<section id="proyectos" class="projects" data-animate="fade-up" aria-labelledby="projects-title">
   <div class="container">
     <div class="section-header">
-      <h2 class="section-title">Trabajo <span class="gradient-text gradient-primary">Destacado</span></h2>
+      <h2 id="projects-title" class="section-title">Trabajo <span class="gradient-text gradient-primary">Destacado</span></h2>
       <p class="section-description">Una muestra de las soluciones digitales que he desarrollado recientemente.</p>
     </div>
     
     <div class="projects-grid">
       {projects.map(project => (
-        <div class="project-card glass">
+        <article class="project-card glass" aria-labelledby={`project-${project.title.replace(/\s+/g, '-').toLowerCase()}-title`}>
           <div class="project-image">
             <Image src={project.image} alt={project.title} loading="lazy" width={800} height={450} />
-            <div class="badge-overlay">{project.badge}</div>
+            <div class="badge-overlay" aria-label={`Estado: ${project.badge}`}>{project.badge}</div>
             <div class="project-overlay">
-              <a href={project.link} target="_blank" rel="noopener noreferrer" class="btn btn-primary">Ver Proyecto</a>
+              <a href={project.link} target="_blank" rel="noopener noreferrer" class="btn btn-primary" aria-label={`Abrir ${project.title} en una nueva pestaña`}>Ver Proyecto</a>
             </div>
           </div>
           <div class="project-info">
@@ -37,10 +37,10 @@ const projects = [
                  <span class="tag">{tag}</span>
                ))}
              </div>
-             <h3 class="project-title">{project.title}</h3>
+             <h3 class="project-title" id={`project-${project.title.replace(/\s+/g, '-').toLowerCase()}-title`}>{project.title}</h3>
              <p class="project-description">{project.description}</p>
           </div>
-        </div>
+        </article>
       ))}
     </div>
   </div>
@@ -150,6 +150,16 @@ const projects = [
   }
 
   .project-card:hover .project-overlay {
+    opacity: 1;
+  }
+
+  .project-card:focus-within {
+    transform: translateY(-10px);
+    border-color: hsl(var(--primary) / 0.5);
+    box-shadow: 0 10px 40px -10px hsl(var(--primary) / 0.3);
+  }
+
+  .project-card:focus-within .project-overlay {
     opacity: 1;
   }
 

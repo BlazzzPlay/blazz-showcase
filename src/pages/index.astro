@@ -19,12 +19,12 @@ const stats = [
 		<Hero />
 		<Projects />
 		
-		<section id="sobre-mi" class="about section-padding" data-animate="fade-up">
+		<section id="sobre-mi" class="about section-padding" data-animate="fade-up" aria-labelledby="about-title">
 			<div class="container">
 				<div class="glass about-content">
 					<div class="about-header text-center">
 						<p class="tagline uppercase tracking-widest font-semibold mb-3">Sobre mí</p>
-						<h2 class="section-title">Construyendo el <span class="gradient-text">futuro digital</span></h2>
+						<h2 class="section-title" id="about-title">Construyendo el <span class="gradient-text">futuro digital</span></h2>
 					</div>
 					<div class="about-grid">
 						<div class="about-text">
@@ -46,34 +46,37 @@ const stats = [
 			</div>
 		</section>
 
-		<section id="contacto" class="contact section-padding" data-animate="fade-up">
+		<section id="contacto" class="contact section-padding" data-animate="fade-up" aria-labelledby="contact-title">
 			<div class="container">
 				<div class="glass contact-content max-w-4xl mx-auto">
 					<div class="contact-header text-center mb-10">
 						<p class="tagline uppercase tracking-widest font-semibold mb-3">Contacto</p>
-						<h2 class="section-title">Hablemos de tu <span class="gradient-text">próximo proyecto</span></h2>
-						<p class="contact-desc">¿Tienes una idea en mente? Completa el formulario y te contactaré a la brevedad.</p>
+						<h2 class="section-title" id="contact-title">Hablemos de tu <span class="gradient-text">próximo proyecto</span></h2>
+						<p class="contact-desc" id="contact-help">¿Tenés una idea en mente? Completá el formulario y te respondo dentro de 24 horas hábiles.</p>
 					</div>
 
-					<form method="POST" id="contact-form" class="contact-form">
+					<form method="POST" id="contact-form" class="contact-form" novalidate>
 						<div class="form-grid">
 							<div class="form-group">
 								<label for="name">Nombre</label>
-								<input type="text" id="name" name="name" placeholder="Tu nombre" required class="glass input-field" />
+								<input type="text" id="name" name="name" placeholder="Tu nombre" required class="glass input-field" aria-describedby="contact-help contact-errors" />
 							</div>
 							<div class="form-group">
 								<label for="email">Email</label>
-								<input type="email" id="email" name="email" placeholder="tu@email.com" required class="glass input-field" />
+								<input type="email" id="email" name="email" placeholder="tu@email.com" required class="glass input-field" aria-describedby="contact-help contact-errors" />
 							</div>
 						</div>
 						<div class="form-group">
 							<label for="subject">Asunto</label>
-							<input type="text" id="subject" name="subject" placeholder="¿En qué puedo ayudarte?" required class="glass input-field" />
+							<input type="text" id="subject" name="subject" placeholder="¿En qué puedo ayudarte?" required class="glass input-field" aria-describedby="contact-help contact-errors" />
 						</div>
 						<div class="form-group">
 							<label for="message">Mensaje</label>
-							<textarea id="message" name="message" rows="5" placeholder="Cuéntame más sobre tu idea..." required class="glass input-field"></textarea>
+							<textarea id="message" name="message" rows="5" placeholder="Cuéntame más sobre tu idea..." required class="glass input-field" aria-describedby="contact-help contact-errors"></textarea>
 						</div>
+
+						<p id="contact-errors" class="sr-only" role="alert" aria-live="assertive"></p>
+						<p id="contact-status" class="sr-only" role="status" aria-live="polite"></p>
 						
 						<div class="form-actions">
 							<button type="submit" class="btn btn-primary btn-large w-full relative">
@@ -98,6 +101,39 @@ const stats = [
 
 	const form = document.querySelector('#contact-form') as HTMLFormElement;
 	const toastContainer = document.querySelector('#toast-container') as HTMLElement;
+	const errorRegion = document.querySelector('#contact-errors') as HTMLElement;
+	const statusRegion = document.querySelector('#contact-status') as HTMLElement;
+
+	type FunnelEvent = 'cta_click' | 'form_start' | 'form_submit_success';
+	type FunnelSource = 'hero' | 'nav' | 'contact_form';
+
+	const getSessionId = () => {
+		const existing = window.sessionStorage.getItem('portfolio_session_id');
+		if (existing) return existing;
+
+		const generated = `sess_${crypto.randomUUID()}`;
+		window.sessionStorage.setItem('portfolio_session_id', generated);
+		return generated;
+	};
+
+	async function track(event: FunnelEvent, source: FunnelSource) {
+		try {
+			await actions.trackFunnel({
+				sessionId: getSessionId(),
+				event,
+				source,
+			});
+		} catch {
+			// Tracking best-effort: nunca bloquea la UX principal.
+		}
+	}
+
+	window.addEventListener('portfolio:funnel', (evt: Event) => {
+		const custom = evt as CustomEvent<{ event: FunnelEvent; source: FunnelSource }>;
+		if (!custom.detail) return;
+
+		void track(custom.detail.event, custom.detail.source);
+	});
 
 	function showToast(message: string, type: 'success' | 'error') {
 		const toast = document.createElement('div');
@@ -113,9 +149,32 @@ const stats = [
 		}, 5000);
 	}
 
+	function focusFirstErrorField(error: unknown) {
+		if (!error || typeof error !== 'object') return;
+
+		const maybeFields = (error as { fields?: Record<string, string[]> }).fields;
+		if (!maybeFields) return;
+
+		const orderedFields = ['name', 'email', 'subject', 'message'];
+		const firstFieldName = orderedFields.find((field) => maybeFields[field]?.length);
+		if (!firstFieldName) return;
+
+		const input = form?.querySelector(`[name="${firstFieldName}"]`) as HTMLElement | null;
+		input?.focus();
+	}
+
+	let hasTrackedFormStart = false;
+	form?.addEventListener('focusin', () => {
+		if (hasTrackedFormStart) return;
+		hasTrackedFormStart = true;
+		void track('form_start', 'contact_form');
+	});
+
 	form?.addEventListener('submit', async (e) => {
 		e.preventDefault();
 		const formData = new FormData(form);
+		errorRegion.textContent = '';
+		statusRegion.textContent = '';
 		
 		const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
 		const btnText = submitBtn.querySelector('.btn-text') as HTMLElement;
@@ -129,15 +188,25 @@ const stats = [
 		const { data, error } = await actions.submitContact(formData);
 		
 		if (error) {
-			showToast(error.message || 'Error de validación. Revisa los campos.', 'error');
+			const message = error.message || 'Error de validación. Revisa los campos.';
+			errorRegion.textContent = message;
+			showToast(message, 'error');
+			focusFirstErrorField(error);
 		} else if (data?.success) {
 				showToast(data.message, 'success');
+				statusRegion.textContent = data.message;
+				await track('form_submit_success', 'contact_form');
 				form.reset();
+				hasTrackedFormStart = false;
 			} else {
-				showToast('Error desconocido.', 'error');
+				const message = 'Error desconocido.';
+				errorRegion.textContent = message;
+				showToast(message, 'error');
 			}
 		} catch (e) {
-			showToast('Error crítico en el servidor.', 'error');
+			const message = 'Error crítico en el servidor.';
+			errorRegion.textContent = message;
+			showToast(message, 'error');
 		} finally {
 			btnText.classList.remove('hidden');
 			btnSpinner.classList.add('hidden');
@@ -259,6 +328,18 @@ const stats = [
 	.input-field:focus {
 		border-color: hsl(var(--primary-light));
 		background: hsla(224, 71%, 15%, 0.6);
+	}
+
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
 	}
 
 	.btn-large {
