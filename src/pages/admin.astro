@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { resolveSeoPage } from '../lib/seo/catalog';
 import { db } from '../db';
 import { contactRequests } from '../db/schema';
 import { desc, eq } from 'drizzle-orm';
@@ -14,9 +15,11 @@ const ADMIN_KEY = 'blazz2026';
 if (token !== ADMIN_KEY) {
   return Astro.redirect('/');
 }
+
+const adminSeo = resolveSeoPage('/admin');
 ---
 
-<Layout title="Admin Panel">
+<Layout seo={adminSeo}>
   <section class="admin section-padding">
     <div class="container">
       <div class="admin-header">

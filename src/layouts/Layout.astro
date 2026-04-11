@@ -1,17 +1,34 @@
 ---
+import { resolveSeoPage } from '../lib/seo/catalog';
+import type { SeoPageConfig } from '../lib/seo/contracts';
+import { safeJsonLd, personSchema, websiteSchema } from '../lib/seo/jsonld';
+import { buildSeoMeta } from '../lib/seo/metadata';
+
 interface Props {
-  title: string;
+  title?: string;
   description?: string;
   image?: string;
+  seo?: SeoPageConfig;
 }
 
 const { 
-  title, 
+  title,
   description = "Portafolio profesional de Fabian Mendoza (Blazz). Ingeniero en Informática con más de 10 años de experiencia creando soluciones digitales innovadoras en el sector EdTech y SaaS.",
-  image = "/projects/project1.webp" // Default image for OG tags
+  image = '/projects/project1.webp',
+  seo,
 } = Astro.props;
 
-const canonicalURL = new URL(Astro.url.pathname, "https://blazz.cl");
+const catalogSeo = resolveSeoPage(Astro.url.pathname);
+const mergedSeo = {
+  ...catalogSeo,
+  ...seo,
+  title: seo?.title ?? title ?? catalogSeo.title,
+  description: seo?.description ?? description,
+  image: seo?.image ?? image,
+  pathname: Astro.url.pathname,
+};
+
+const seoMeta = buildSeoMeta(mergedSeo);
 ---
 
 <!doctype html>
@@ -23,22 +40,22 @@ const canonicalURL = new URL(Astro.url.pathname, "https://blazz.cl");
     <meta name="generator" content={Astro.generator} />
     
     <!-- SEO Primario -->
-    <title>{title} | Fabian Mendoza - Creative Developer</title>
-    <meta name="title" content={`${title} | Fabian Mendoza - Creative Developer`} />
-    <meta name="description" content={description} />
+    <title>{seoMeta.fullTitle}</title>
+    <meta name="title" content={seoMeta.fullTitle} />
+    <meta name="description" content={seoMeta.description} />
     <meta name="keywords" content="Fabian Mendoza, Blazz, Ingeniero Informático, Desarrollo SaaS, EdTech, React, TypeScript, Transformación Digital, Portafolio, Chile, Creative Developer, Jefe de Informática, Colegio Montessori, EduCal" />
     <meta name="author" content="Fabian Mendoza" />
-    <meta name="robots" content="index, follow" />
+    <meta name="robots" content={seoMeta.robots} />
     <meta name="language" content="Spanish" />
     <meta name="revisit-after" content="7 days" />
-    <link rel="canonical" href={canonicalURL} />
+    <link rel="canonical" href={seoMeta.canonical} />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content={canonicalURL} />
-    <meta property="og:title" content={`${title} | Fabian Mendoza`} />
-    <meta property="og:description" content={description} />
-    <meta property="og:image" content={`https://blazz.cl${image}`} />
+    <meta property="og:url" content={seoMeta.og.url} />
+    <meta property="og:title" content={seoMeta.og.title} />
+    <meta property="og:description" content={seoMeta.og.description} />
+    <meta property="og:image" content={seoMeta.og.image} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:site_name" content="Fabian Mendoza - Creative Developer" />
@@ -46,53 +63,17 @@ const canonicalURL = new URL(Astro.url.pathname, "https://blazz.cl");
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content={canonicalURL} />
-    <meta property="twitter:title" content={`${title} | Fabian Mendoza`} />
-    <meta property="twitter:description" content={description} />
-    <meta property="twitter:image" content={`https://blazz.cl${image}`} />
+    <meta property="twitter:url" content={seoMeta.canonical} />
+    <meta property="twitter:title" content={seoMeta.twitter.title} />
+    <meta property="twitter:description" content={seoMeta.twitter.description} />
+    <meta property="twitter:image" content={seoMeta.twitter.image} />
     <meta property="twitter:creator" content="@BlazzzPlay" />
 
     <!-- JSON-LD Structured Data: Person -->
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "Person",
-        "name": "Fabian Mendoza",
-        "alternateName": "Blazz",
-        "url": "https://blazz.cl",
-        "image": "https://blazz.cl/projects/project1.webp",
-        "jobTitle": "Jefe de Informática & Creative Developer",
-        "description": {description},
-        "alumniOf": {
-          "@type": "EducationalOrganization",
-          "name": "Ingeniero en Informática"
-        },
-        "knowsAbout": ["Desarrollo SaaS", "EdTech", "React", "TypeScript", "Transformación Digital", "Node.js"],
-        "sameAs": [
-          "https://github.com/BlazzzPlay"
-        ],
-        "address": {
-          "@type": "PostalAddress",
-          "addressCountry": "CL"
-        }
-      }
-    </script>
+    <script type="application/ld+json" set:html={safeJsonLd(personSchema({ description: seoMeta.description }))}></script>
 
     <!-- JSON-LD Structured Data: WebSite -->
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "WebSite",
-        "name": "Fabian Mendoza - Creative Developer",
-        "url": "https://blazz.cl",
-        "description": "Portafolio profesional de Fabian Mendoza (Blazz). Ingeniero en Informática con más de 10 años de experiencia.",
-        "inLanguage": "es",
-        "publisher": {
-          "@type": "Person",
-          "name": "Fabian Mendoza"
-        }
-      }
-    </script>
+    <script type="application/ld+json" set:html={safeJsonLd(websiteSchema())}></script>
 
     <!-- Google Fonts: Inter & Outfit -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

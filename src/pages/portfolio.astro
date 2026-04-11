@@ -1,0 +1,52 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/Navigation.astro';
+import Projects from '../components/Projects.astro';
+import Footer from '../components/Footer.astro';
+import { resolveSeoPage } from '../lib/seo/catalog';
+
+const portfolioSeo = resolveSeoPage('/portfolio');
+---
+
+<Layout seo={portfolioSeo}>
+  <Navigation />
+  <main class="section-padding" id="inicio">
+    <section class="container page-hero" aria-labelledby="portfolio-title">
+      <p class="eyebrow">Portfolio en Chile</p>
+      <h1 id="portfolio-title">Portfolio real de proyectos SaaS y EdTech para Chile</h1>
+      <p>
+        Casos reales con foco en producto, performance y claridad técnica. Cada proyecto muestra decisiones de
+        arquitectura y resultados concretos.
+      </p>
+    </section>
+
+    <Projects />
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  .page-hero {
+    max-width: 850px;
+    text-align: center;
+  }
+
+  .eyebrow {
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: hsl(var(--accent-light));
+    font-weight: 700;
+    margin-bottom: 1rem;
+    font-size: 0.8rem;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 5vw, 3rem);
+    margin-bottom: 1rem;
+  }
+
+  .page-hero p {
+    color: hsl(var(--text-muted));
+    line-height: 1.7;
+  }
+</style>

@@ -1,0 +1,85 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/Navigation.astro';
+import Footer from '../components/Footer.astro';
+import { resolveSeoPage } from '../lib/seo/catalog';
+
+const serviciosSeo = resolveSeoPage('/servicios');
+---
+
+<Layout seo={serviciosSeo}>
+  <Navigation />
+  <main class="section-padding" id="inicio">
+    <section class="container page-hero" aria-labelledby="servicios-title">
+      <p class="eyebrow">Servicios en Chile</p>
+      <h1 id="servicios-title">Servicios de desarrollo web y arquitectura en Santiago</h1>
+      <p>
+        Te acompaño desde la definición técnica hasta la entrega en producción: arquitectura limpia,
+        automatización y foco en resultados para equipos que quieren escalar sin deuda técnica.
+      </p>
+    </section>
+
+    <section class="container services-grid" aria-label="Listado de servicios">
+      <article class="glass card">
+        <h2>Arquitectura de software</h2>
+        <p>Diseño de soluciones mantenibles con foco en performance, observabilidad y evolución por etapas.</p>
+      </article>
+      <article class="glass card">
+        <h2>Desarrollo de producto</h2>
+        <p>Implementación de features críticas en Astro/TypeScript, con criterios claros de calidad y entrega.</p>
+      </article>
+      <article class="glass card">
+        <h2>Automatización operativa</h2>
+        <p>Flujos y herramientas para ahorrar tiempo del equipo y reducir errores repetitivos de operación.</p>
+      </article>
+    </section>
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  .page-hero {
+    max-width: 850px;
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .eyebrow {
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: hsl(var(--accent-light));
+    font-weight: 700;
+    margin-bottom: 1rem;
+    font-size: 0.8rem;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 5vw, 3rem);
+    margin-bottom: 1rem;
+  }
+
+  .page-hero p {
+    color: hsl(var(--text-muted));
+    line-height: 1.7;
+  }
+
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+
+  .card {
+    padding: 1.5rem;
+    border-radius: 1rem;
+  }
+
+  .card h2 {
+    margin-bottom: 0.5rem;
+    font-size: 1.2rem;
+  }
+
+  .card p {
+    color: hsl(var(--text-muted));
+  }
+</style>

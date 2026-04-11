@@ -17,7 +17,8 @@
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:ui": "playwright test --ui",
-    "test:e2e:report": "playwright show-report"
+    "test:e2e:report": "playwright show-report",
+    "test:unit": "node --import tsx --test src/lib/seo/__tests__/*.test.ts"
   },
   "dependencies": {
     "@astrojs/node": "^10.0.3",
@@ -29,6 +30,7 @@
   "devDependencies": {
     "@playwright/test": "^1.54.2",
     "drizzle-kit": "^0.31.10",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }
 }

@@ -1,9 +1,12 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { resolveSeoPage } from '../lib/seo/catalog';
 import Navigation from '../components/Navigation.astro';
 import Hero from '../components/Hero.astro';
 import Projects from '../components/Projects.astro';
 import Footer from '../components/Footer.astro';
+
+const homeSeo = resolveSeoPage('/');
 
 const stats = [
   { value: '+10', label: 'Años de experiencia' },
@@ -13,7 +16,7 @@ const stats = [
 ];
 ---
 
-<Layout title="Portafolio Profesional">
+<Layout seo={homeSeo}>
 	<Navigation />
 	<main>
 		<Hero />
