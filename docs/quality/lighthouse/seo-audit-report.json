@@ -1,0 +1,91 @@
+{
+  "generatedAt": "2026-04-12T00:54:20.657Z",
+  "options": {
+    "artifactsDir": "docs/quality/lighthouse",
+    "baselineFile": "docs/quality/seo-baseline-chile.md",
+    "outputFile": "docs/quality/lighthouse/seo-audit-report.json",
+    "markdownFile": "docs/quality/lighthouse/seo-audit-report.md",
+    "threshold": 95,
+    "privateIndexed": 0
+  },
+  "result": {
+    "threshold": 95,
+    "privateUrlsIndexed": 0,
+    "compliant": false,
+    "correctiveAction": "open-corrective-action",
+    "averageMobileSeo": 92,
+    "averageDesktopSeo": 92,
+    "routeResults": [
+      {
+        "route": "/",
+        "slug": "home",
+        "mobileSeo": 92,
+        "desktopSeo": 92,
+        "compliant": false,
+        "breaches": [
+          "/ mobile SEO 92 < 95",
+          "/ desktop SEO 92 < 95"
+        ],
+        "artifacts": {
+          "mobile": "2026-04-11-home-mobile.json",
+          "desktop": "2026-04-11-home-desktop.json"
+        }
+      },
+      {
+        "route": "/servicios",
+        "slug": "servicios",
+        "mobileSeo": 92,
+        "desktopSeo": 92,
+        "compliant": false,
+        "breaches": [
+          "/servicios mobile SEO 92 < 95",
+          "/servicios desktop SEO 92 < 95"
+        ],
+        "artifacts": {
+          "mobile": "2026-04-11-servicios-mobile.json",
+          "desktop": "2026-04-11-servicios-desktop.json"
+        }
+      },
+      {
+        "route": "/portfolio",
+        "slug": "portfolio",
+        "mobileSeo": 92,
+        "desktopSeo": 92,
+        "compliant": false,
+        "breaches": [
+          "/portfolio mobile SEO 92 < 95",
+          "/portfolio desktop SEO 92 < 95"
+        ],
+        "artifacts": {
+          "mobile": "2026-04-11-portfolio-mobile.json",
+          "desktop": "2026-04-11-portfolio-desktop.json"
+        }
+      },
+      {
+        "route": "/contacto",
+        "slug": "contacto",
+        "mobileSeo": 92,
+        "desktopSeo": 92,
+        "compliant": false,
+        "breaches": [
+          "/contacto mobile SEO 92 < 95",
+          "/contacto desktop SEO 92 < 95"
+        ],
+        "artifacts": {
+          "mobile": "2026-04-11-contacto-mobile.json",
+          "desktop": "2026-04-11-contacto-desktop.json"
+        }
+      }
+    ],
+    "breaches": [
+      "/ mobile SEO 92 < 95",
+      "/ desktop SEO 92 < 95",
+      "/servicios mobile SEO 92 < 95",
+      "/servicios desktop SEO 92 < 95",
+      "/portfolio mobile SEO 92 < 95",
+      "/portfolio desktop SEO 92 < 95",
+      "/contacto mobile SEO 92 < 95",
+      "/contacto desktop SEO 92 < 95"
+    ]
+  }
+}

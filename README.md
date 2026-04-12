@@ -23,6 +23,19 @@ Este es el portafolio profesional de **Fabian Mendoza (Blazz)**, construido con 
 
 3. Abre el sitio en `http://localhost:4321`.
 
+## 🔎 Auditoría SEO automatizada (T2)
+
+- Ejecutá `npm run seo:audit` para validar el baseline Lighthouse multi-URL (`/`, `/servicios`, `/portfolio`, `/contacto`) con umbral `SEO >= 95` en mobile/desktop.
+- El comando también valida `private indexed URLs = 0` (por defecto) y falla con exit code `1` si encuentra breaches.
+- Reportes versionables generados:
+  - `docs/quality/lighthouse/seo-audit-report.json`
+  - `docs/quality/lighthouse/seo-audit-report.md`
+- Flags opcionales:
+  - `--threshold 95`
+  - `--private-indexed 0`
+  - `--artifacts-dir docs/quality/lighthouse`
+  - `--baseline docs/quality/seo-baseline-chile.md`
+
 ## 🌐 Despliegue en Dokploy
 
 Este proyecto está configurado para ejecutarse en contenedores Docker via Dokploy.
