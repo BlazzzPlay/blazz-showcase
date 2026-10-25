@@ -18,14 +18,16 @@ const {
   seo,
 } = Astro.props;
 
-const catalogSeo = resolveSeoPage(Astro.url.pathname);
+// Static directory output adds slashes; preserve the existing public SEO URLs.
+const pathname = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const catalogSeo = resolveSeoPage(pathname);
 const mergedSeo = {
   ...catalogSeo,
   ...seo,
   title: seo?.title ?? title ?? catalogSeo.title,
   description: seo?.description ?? description,
   image: seo?.image ?? image,
-  pathname: Astro.url.pathname,
+  pathname,
 };
 
 const seoMeta = buildSeoMeta(mergedSeo);

@@ -221,7 +221,7 @@ function run(): number {
   const finalBreaches = [...result.breaches, ...baselineBreaches];
   const finalCompliant = finalBreaches.length === 0;
 
-  const finalResult = {
+  const finalResult: ReturnType<typeof evaluateSeoAuditFromReports> = {
     ...result,
     compliant: finalCompliant,
     correctiveAction: finalCompliant ? 'none' : 'open-corrective-action',
