@@ -92,7 +92,9 @@ test('remote resolver uses only fixed JWKS, forbids redirects, caches and ignore
   const resolver = createAccessKeyResolver(async (url, options) => {
     calls++;
     assert.equal(String(url), 'https://blazzz.cloudflareaccess.com/cdn-cgi/access/certs');
-    assert.equal(options?.redirect, 'error');
+    // workerd only implements 'follow'/'manual'; 'error' throws at the edge.
+    // 'manual' surfaces a 3xx, which jose rejects (non-200), so redirects still deny.
+    assert.equal(options?.redirect, 'manual');
     assert.equal(options?.method, 'GET');
     assert.ok(options?.signal instanceof AbortSignal);
     return Response.json(jwks);
