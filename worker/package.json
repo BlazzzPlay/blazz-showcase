@@ -13,7 +13,7 @@
     "test:access": "node --test test/access-auth.test.ts test/private-panel.test.ts",
     "test:static": "node --test test/static-integration.test.ts",
     "test:foundation": "CF_SEND_TELEMETRY=false DO_NOT_TRACK=1 STATIC_FIXTURE=1 cloudflare build && CF_SEND_TELEMETRY=false DO_NOT_TRACK=1 STATIC_FIXTURE=1 node --test test/foundation.test.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "CF_SEND_TELEMETRY=false DO_NOT_TRACK=1 cloudflare workers types && tsc --noEmit"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "2.0.0-beta.sha-91c870c02",
