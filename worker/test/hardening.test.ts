@@ -6,23 +6,43 @@ import { localD1 } from './helpers/local-d1.ts';
 
 const origin = 'https://portfolio.example';
 
-// Early rejections must release the upload so a keep-alive bridge never reuses a half-read socket.
-test('early 405/403/415 rejections cancel the unread request body', async () => {
-  const cases: Array<[number, string, Record<string, string>]> = [
-    [405, 'PUT', { origin, 'content-type': 'application/json' }],
-    [403, 'POST', { origin: 'https://evil.example', 'content-type': 'application/json' }],
-    [415, 'POST', { origin, 'content-type': 'text/plain' }],
-  ];
-  for (const [status, method, headers] of cases) {
-    let cancelled = false;
+// Early rejections drain small unread bodies so the local Vite -> workerd keep-alive
+// connection is reusable (cancel/no-read produced ~0.5% "fetch failed" 500s; drain 0/1000).
+const rejections: Array<[number, string, Record<string, string>]> = [
+  [405, 'PUT', { origin, 'content-type': 'application/json' }],
+  [403, 'POST', { origin: 'https://evil.example', 'content-type': 'application/json' }],
+  [415, 'POST', { origin, 'content-type': 'text/plain' }],
+];
+test('early 405/403/415 rejections fully drain small request bodies without cancelling', async () => {
+  for (const [status, method, headers] of rejections) {
+    let chunks = 3, closed = false, cancelled = false;
     const body = new ReadableStream<Uint8Array>({
-      pull(controller) { controller.enqueue(new TextEncoder().encode('{"name":"x"}')); },
+      pull(controller) {
+        if (chunks-- > 0) controller.enqueue(new TextEncoder().encode('{"name":"x"}'));
+        else { controller.close(); closed = true; }
+      },
       cancel() { cancelled = true; },
     });
     const request = new Request(origin + '/api/contact', { method, headers, body, duplex: 'half' } as RequestInit);
     const response = await worker.fetch(request, { DB: undefined as unknown as D1Database });
     assert.equal(response.status, status);
-    assert.equal(cancelled, true, `body not cancelled on ${status}`);
+    assert.equal(closed, true, `body not drained on ${status}`);
+    assert.equal(cancelled, false, `small body cancelled on ${status}`);
+  }
+});
+
+test('early rejections stop draining and cancel bodies larger than 16 KiB', async () => {
+  for (const [status, method, headers] of rejections) {
+    let pulled = 0, cancelled = false;
+    const body = new ReadableStream<Uint8Array>({
+      pull(controller) { pulled += 1024; controller.enqueue(new Uint8Array(1024)); },
+      cancel() { cancelled = true; },
+    });
+    const request = new Request(origin + '/api/contact', { method, headers, body, duplex: 'half' } as RequestInit);
+    const response = await worker.fetch(request, { DB: undefined as unknown as D1Database });
+    assert.equal(response.status, status);
+    assert.equal(cancelled, true, `oversized body not cancelled on ${status}`);
+    assert.ok(pulled <= 16 * 1024 + 2048, `read ${pulled} bytes past the cap on ${status}`);
   }
 });
 

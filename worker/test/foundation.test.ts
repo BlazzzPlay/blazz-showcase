@@ -25,9 +25,13 @@ test('isolated cf build configuration pins resources and asset routing', async (
   const config = JSON.parse(await readFile(resolve(cwd,
     '.cloudflare/output/v0/workers/default/worker.config.json'), 'utf8'));
   assert.equal(config.name, 'blazz-portfolio');
-  assert.deepEqual(config.env, { DB: { type: 'd1', id } });
+  assert.deepEqual(config.env, {
+    DB: { type: 'd1', id },
+    ACCESS_AUD: { type: 'text', value: 'fc09a27bb9ae54bc690991d642b1a833aeb95599e4c4701113a49f3f3da7b403' },
+  });
   assert.deepEqual(config.assets.runWorkerFirst, ['/api/*', '/admin', '/admin/*', '/private', '/private/*']);
   assert.equal(config.assets.notFoundHandling, 'none');
+  assert.equal(config.assets.htmlHandling, 'drop-trailing-slash');
   const source = await readFile(resolve(cwd, 'cloudflare.config.ts'), 'utf8');
   assert.match(source, /accountId: '78a16433f7a4e0421319f6310b5acacc'/);
   assert.doesNotMatch(source, /directory:/);
@@ -44,6 +48,9 @@ test('cf dev assets, worker health and private denial', { timeout: 120000 }, asy
   const port = address.port;
   await new Promise<void>((done, reject) => reservation.close(error => error ? reject(error) : done()));
   const base = `http://127.0.0.1:${port}`;
+  // Health requires the migrated schema, so apply the production migration locally first.
+  const migrated = cf(['d1', 'migrations', 'apply', id, '--local', '--persist-to', state]);
+  assert.equal(migrated.status, 0, `cf local production migration failed: ${migrated.stderr}; ${migrated.error}`);
   console.log(`FOUNDATION_PORT=${port} FOUNDATION_STATE=${state} cloudflare dev`);
   const server = spawn('cloudflare', ['dev'], {
     cwd, env: { ...process.env, FOUNDATION_STATE: state, FOUNDATION_PORT: String(port) },
@@ -128,8 +135,9 @@ test('cf local migration repeat-apply and runtime binding query', { timeout: 600
     const db = await runtime.getD1Database('DB');
     assert.deepEqual(await db.prepare('SELECT value FROM foundation_probe WHERE id = 1').first(),
       { value: 'local-only' });
-    assert.equal(await db.prepare('SELECT COUNT(*) AS count FROM d1_migrations').first('count'), 1);
-    console.log(`Local DB mapping: ${state}/v3; binding DB -> ${id}; probe row and one migration verified`);
+    // Production 0001_initial (applied before cf dev) plus the 0001_probe fixture.
+    assert.equal(await db.prepare('SELECT COUNT(*) AS count FROM d1_migrations').first('count'), 2);
+    console.log(`Local DB mapping: ${state}/v3; binding DB -> ${id}; probe row and two migrations verified`);
   } finally {
     await runtime.dispose();
   }
