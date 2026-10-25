@@ -16,6 +16,8 @@ export default defineConfig({
     assets: {
       runWorkerFirst: ['/api/*', '/admin', '/admin/*', '/private', '/private/*'],
       notFoundHandling: 'none',
+      // Serve canonical slash-less URLs (/servicios) directly; /servicios/ redirects to them.
+      htmlHandling: 'drop-trailing-slash',
     },
   },
 });

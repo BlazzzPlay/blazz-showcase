@@ -131,10 +131,16 @@ test('real static assets and JSON API share one local Worker origin with private
       await response.arrayBuffer();
       return response;
     }
+    // Canonical/sitemap URLs must answer 200 directly, never through a redirect.
     for (const path of ['/', '/servicios', '/portfolio', '/contacto']) {
-      const response = await fetch(stack.base + path);
+      const response = await fetch(stack.base + path, { redirect: 'manual' });
       assert.equal(response.status, 200, path);
       assert.match(await response.text(), /rel="canonical"/);
+    }
+    for (const path of ['/servicios', '/portfolio', '/contacto']) {
+      const response = await probe(path + '/', { redirect: 'manual' });
+      assert.ok([301, 307, 308].includes(response.status), `${path}/ ${response.status}`);
+      assert.equal(new URL(response.headers.get('location') ?? '', stack.base).pathname, path);
     }
     for (const path of ['/admin', '/admin/', '/admin/users', '/private', '/private/documents', '/api/delete', '/api/mark-read', '/api/unknown']) {
       for (const method of ['GET', 'POST', 'OPTIONS']) {
