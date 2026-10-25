@@ -93,8 +93,7 @@ The signed email is trusted only as an issuer claim: no nonstandard mandatory
 `email_verified` claim is imposed. Login-provider/mailbox assurance, the one-user
 Access policy, application/AUD provisioning and deployment verification remain
 pending. `npm --prefix worker run test:access` uses ephemeral local RSA keys and
-fake JWKS fetches, with no external Access traffic. C2a's CLI hang remains a
-separate delivery blocker.
+fake JWKS fetches, with no external Access traffic.
 
 ## C3b: private contacts panel
 
@@ -118,7 +117,7 @@ with no error details returned or logged. The public footer links to `/private`
 sends a per-response nonce CSP (`default-src 'none'`, `frame-ancestors 'none'`).
 `npm --prefix worker run test:access` covers these with local D1 and local JWTs.
 
-## Foundation proof and unresolved C2a
+## Foundation proof (C2a resolved)
 
 Build Output is `.cloudflare/output/v0/config.json`; bundle/config/assets are
 under `workers/default/`. Vite uses `../dist` by default. `STATIC_FIXTURE=1`
@@ -129,9 +128,13 @@ The account78a16433f7a4e0421319f6310b5acacc and DB UUID
 disabled, `envDir:false` prevents dotenv loading, and no resources are provisioned.
 No Wrangler dependency exists here; cf delegates builds to Vite.
 
-C2a stays blocked: cf beta14 local SQL/migration commands print valid output but
-hang, independently reproduced at60seconds. The foundation test keeps every
-CLI exit-zero assertion. Direct Miniflare tests do not prove CLI termination.
+C2a is resolved. cf beta14 local SQL/migration commands printed valid output but
+never exited (`d1 migrations apply --local`: 45 s timeout); cf beta21 exits in ~1.4 s
+with the same result. `cf dev` itself always stopped on SIGTERM (~20 ms, exit 143).
+The project pins cf 1.0.0-beta.21 (Node ^22.23.0 or ^24.22.0). Inside this
+directory a global `cf` delegates to the project copy; set `CF_DELEGATION=1` only to
+compare versions. `npm --prefix worker run test:foundation` passes 3/3: it applies
+the production migration locally before `cf dev`, so health returns 200.
 The authorized integration cleanup replaces the obsolete contact404 expectation:
 missing Origin yields403, invalid same-origin JSON fields yield400, and unsupported
 methods yield405. Admin, private and unknown API namespaces still require404.
@@ -156,7 +159,7 @@ explicitly authorized; do not apply either migration remotely in this slice.
 
 | Dependency | Locked version |
 | --- | --- |
-| cf | 1.0.0-beta.14 |
+| cf | 1.0.0-beta.21 |
 | @cloudflare/vite-plugin | 2.0.0-beta.sha-91c870c02 |
 | Vite | 8.3.4 |
 | TypeScript | 7.0.2 |
@@ -217,7 +220,7 @@ on cf. The intended local schema command, from `worker/`, is:
 cloudflare d1 migrations apply 43a7fa88-38f6-43d0-99ea-df68bab1896e --dir migrations --local --persist-to .cloudflare/local-state
 ```
 
-This command remains subject to the documented C2a termination hang. Never
+It exits normally with cf beta21. Never
 remove `--local` or substitute a remote migration. `FOUNDATION_STATE` must match
 that persist-to root when using another isolated local state. Without schema,
 contact/funnel return503, not fabricated success. Direct test-harness migration
@@ -248,19 +251,16 @@ has5 checks including exact public HTML asset equality, private/data exclusion,
 HTTP/API/D1 proof, closed listener after child shutdown and CI/lock-root checks.
 CI was checked structurally, not executed remotely; no installer ran locally.
 
-Earlier status-only Node probes observed intermittent Vite `fetch failed`500s.
-The probes now fully consume responses, without retries or changed status
-assertions; subsequent repeated runs passed5/5. This does not establish the
-runtime error's root cause. workerd RPC diagnostics also appeared during a
-passing browser run. These are disclosed local beta-tooling risks, not cloud
-readiness evidence. The foundation CLI termination failure remains distinct,
-unchanged and not rerun in this correction.
+The intermittent local Vite `fetch failed` 500 (C2b2) is resolved. It appeared only
+on the request that followed an early 405/403/415 whose body was not read: the
+Vite -> workerd keep-alive connection failed on reuse (cancel 6/1000, no-read 5/1000
+pairs). `reject()` now drains bodies up to 16 KiB and cancels larger ones: 0/1000 and
+0/2000 pairs. Production never showed it (16/16 live pairs).
 
 C3a verification remains Worker-owned and fail closed; the C3b panel and every
 administrative mutation run only after it. No key redirects or privileged Astro
 routes are restored; the private panel is rendered by the Worker only.
-Do not certify CLI/deployment compatibility until C2a is resolved. Migration,
-Access provisioning, deployment and DNS remain separate authorization gates.
+Migration, Access provisioning, deployment and DNS remain separate authorization gates.
 
 Parent-owned rollback: revert this frontend/transport/test integration and the
 six source removals together as a reviewed change, then rebuild outputs. Keep

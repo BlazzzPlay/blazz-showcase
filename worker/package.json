@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=22.18.0"
+    "node": "^22.23.0 || ^24.22.0 || >=26.12.0"
   },
   "scripts": {
     "build": "CF_SEND_TELEMETRY=false DO_NOT_TRACK=1 cloudflare build",
@@ -18,7 +18,7 @@
   "devDependencies": {
     "@cloudflare/vite-plugin": "2.0.0-beta.sha-91c870c02",
     "@types/node": "26.6.5",
-    "cf": "1.0.0-beta.14",
+    "cf": "1.0.0-beta.21",
     "miniflare": "5.20261006.1-alpha",
     "typescript": "7.0.2",
     "vite": "8.3.4"

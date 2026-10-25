@@ -22,11 +22,11 @@ no hay HMR Astro ni aprovisionamiento sorpresa. `FOUNDATION_PORT` y
 `FOUNDATION_STATE` permiten ajustar puerto y persistencia local del plugin.
 No se ejecutan migraciones automáticamente en desarrollo ni en producción.
 
-**Bloqueo conocido:** cf beta14 imprime resultados correctos pero puede no
-terminar al aplicar migraciones/SQL local. La API devuelve503 sin esquema;
-consultá [worker/README.md](worker/README.md) antes de inicializar D1 local.
+Para inicializar D1 local: `npm --prefix worker exec -- cloudflare d1 migrations apply
+<DB_ID> --local --persist-to <estado>` (cf beta21 termina normalmente). Sin esquema,
+la API devuelve 503; detalles en [worker/README.md](worker/README.md).
 El bypass Miniflare pertenece exclusivamente al arnés de pruebas, no al operador.
-No hay migraciones remotas ni despliegue verificado; D1 cloud sigue vacío.
+Producción: Worker desplegado en https://blazz.cl con D1 remota migrada.
 
 ## Construcción y pruebas
 
