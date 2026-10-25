@@ -110,7 +110,10 @@ Mutations require same-origin `Origin` (403, CSRF protection because Access uses
 cookie) and `application/json` (415); other methods return405 with `Allow: POST`.
 Any other body shape returns400 `Identificador inválido.`, an unknown id returns404
 `Solicitud no encontrada.`, success returns `{"success":true}`. Rejected requests
-change no rows. Other `/private/*` paths return404. Responses are `no-store`,
+change no rows. Other `/private/*` paths return404. If D1 fails, the panel returns
+503 `Servicio no disponible` and mutations return503 `No se pudo completar la acción.`,
+with no error details returned or logged. The public footer links to `/private`
+(`rel="nofollow"`); Access still gates every request. Responses are `no-store`,
 `noindex`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, and the panel
 sends a per-response nonce CSP (`default-src 'none'`, `frame-ancestors 'none'`).
 `npm --prefix worker run test:access` covers these with local D1 and local JWTs.
