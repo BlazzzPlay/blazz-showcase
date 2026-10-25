@@ -35,8 +35,23 @@ export async function readBody(request: Request): Promise<unknown> {
 }
 
 // Release an unread upload before rejecting so keep-alive bridges never reuse a half-read connection.
+// Drain (do not cancel) a small unread upload before rejecting: an unconsumed body made
+// the local Vite -> workerd keep-alive connection fail on reuse (~0.5% 500s with cancel
+// or no read; 0/1000 with drain). Bodies above MAX_BODY are cancelled to bound the work.
 export async function reject(request: Request, response: Response): Promise<Response> {
-  if (request.body && !request.bodyUsed) await request.body.cancel().catch(() => undefined);
+  if (!request.body || request.bodyUsed) return response;
+  const reader = request.body.getReader();
+  let size = 0;
+  try {
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      size += value.byteLength;
+      if (size > MAX_BODY) { await reader.cancel(); break; }
+    }
+  } catch {
+    // A broken upload does not change the rejection already decided.
+  } finally { reader.releaseLock(); }
   return response;
 }
 
