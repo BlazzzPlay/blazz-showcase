@@ -6,13 +6,13 @@
     "node": ">=22.18.0"
   },
   "scripts": {
-    "build": "cloudflare build",
-    "dev": "cloudflare dev",
+    "build": "CF_SEND_TELEMETRY=false DO_NOT_TRACK=1 cloudflare build",
+    "dev": "CF_SEND_TELEMETRY=false DO_NOT_TRACK=1 cloudflare dev",
     "test": "npm run test:api && npm run test:static && npm run test:foundation",
-    "test:api": "node --test test/public-api.test.ts test/db.test.ts",
+    "test:api": "node --test test/public-api.test.ts test/db.test.ts test/hardening.test.ts",
     "test:access": "node --test test/access-auth.test.ts",
     "test:static": "node --test test/static-integration.test.ts",
-    "test:foundation": "STATIC_FIXTURE=1 cloudflare build && STATIC_FIXTURE=1 node --test test/foundation.test.ts",
+    "test:foundation": "CF_SEND_TELEMETRY=false DO_NOT_TRACK=1 STATIC_FIXTURE=1 cloudflare build && CF_SEND_TELEMETRY=false DO_NOT_TRACK=1 STATIC_FIXTURE=1 node --test test/foundation.test.ts",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

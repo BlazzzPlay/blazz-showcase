@@ -48,8 +48,10 @@ test('valid signed identity reaches only the C3a placeholder (no panel or bindin
   }
 });
 test('signature, algorithm, issuer, audience and exact signed email are mandatory', async () => {
-  for (const claims of [{ iss: 'https://evil.example' }, { iss: undefined }, { aud: 'wrong' }, { aud: undefined }, { email: undefined }, { email: 'other@gmail.com' }, { email: 'Fabianma7@gmail.com' }, { email: ' fabianma7@gmail.com' }])
+  for (const claims of [{ iss: 'https://evil.example' }, { iss: undefined }, { aud: 'wrong' }, { aud: undefined }, { email: undefined }, { email: 'other@gmail.com' }, { email: ' fabianma7@gmail.com' }, { email: 'fabianma7@gmail.com.evil' }, { email: 42 }])
     await check(await token(claims));
+  // Email comparison is case-insensitive; whitespace and other identities stay denied.
+  for (const email of ['Fabianma7@gmail.com', 'FABIANMA7@GMAIL.COM']) await check(await token({ email }), 404);
   await check(await token({}, {}, otherKeys.privateKey));
   await check(await token({}, { alg: 'RS512' }, unsupportedKeys.privateKey));
   await check(await new SignJWT({}).setProtectedHeader({ alg: 'HS256' }).sign(new Uint8Array(32)));

@@ -31,7 +31,7 @@ export async function startStack({ build = true, port = Number(process.env.TEST_
       try { process.kill(-child.pid, 'SIGKILL'); } catch (error) { if (error.code !== 'ESRCH') throw error; }
     }
   })();
-  function launch(command, args, cwd, env = process.env) {
+  function launch(command, args, cwd, env = { ...process.env, CF_SEND_TELEMETRY: 'false', DO_NOT_TRACK: '1' }) {
     const child = spawn(command, args, { cwd, env, detached: true, stdio: ['ignore', 'pipe', 'pipe'] });
     children.push(child);
     console.log(`Owned local stack child PID/group ${child.pid}: ${command}`);
@@ -60,7 +60,7 @@ export async function startStack({ build = true, port = Number(process.env.TEST_
     await local.dispose();
     if (stopping) throw new Error('Local stack startup interrupted');
     const child = launch(resolve(root, 'worker/node_modules/.bin/cloudflare'), ['dev'], resolve(root, 'worker'), {
-      ...process.env, STATIC_FIXTURE: '0', FOUNDATION_PORT: String(port), FOUNDATION_STATE: state,
+      ...process.env, CF_SEND_TELEMETRY: 'false', DO_NOT_TRACK: '1', STATIC_FIXTURE: '0', FOUNDATION_PORT: String(port), FOUNDATION_STATE: state,
     });
     const base = `http://127.0.0.1:${port}`;
     let ready = false;

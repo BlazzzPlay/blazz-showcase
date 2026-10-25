@@ -13,8 +13,9 @@ export function createHandler(keys?: JWTVerifyGetKey) {
       }
       if (path === '/api/health' && request.method === 'GET') {
         try {
-          const row = await env.DB.prepare('SELECT 1 AS ok').first<{ ok: number }>();
-          if (row?.ok === 1) return Response.json({ ok: true }, { headers });
+          // Healthy only when both migrated tables exist, not merely when the binding answers.
+          const row = await env.DB.prepare("SELECT COUNT(*) AS ok FROM sqlite_master WHERE type = 'table' AND name IN ('contact_requests', 'contact_funnel_events')").first<{ ok: number }>();
+          if (row?.ok === 2) return Response.json({ ok: true }, { headers });
         } catch {
           // Never expose binding errors, SQL, credentials or submitted data.
         }

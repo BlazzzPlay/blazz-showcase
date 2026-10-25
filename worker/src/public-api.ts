@@ -34,17 +34,23 @@ async function readBody(request: Request): Promise<unknown> {
   return JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes));
 }
 
+// Release an unread upload before rejecting so keep-alive bridges never reuse a half-read connection.
+async function reject(request: Request, response: Response): Promise<Response> {
+  if (request.body && !request.bodyUsed) await request.body.cancel().catch(() => undefined);
+  return response;
+}
+
 export async function publicApi(request: Request, env: Env, contact: boolean): Promise<Response> {
   if (request.method !== 'POST') {
     const response = failure('Método no permitido.', 405);
     response.headers.set('allow', 'POST');
-    return response;
+    return reject(request, response);
   }
   if (request.headers.get('origin') !== new URL(request.url).origin) {
-    return failure('Origen no permitido.', 403);
+    return reject(request, failure('Origen no permitido.', 403));
   }
   if (request.headers.get('content-type')?.split(';')[0].trim().toLowerCase() !== 'application/json') {
-    return failure('Envía JSON con Content-Type application/json.', 415);
+    return reject(request, failure('Envía JSON con Content-Type application/json.', 415));
   }
   let body: unknown;
   try { body = await readBody(request); }

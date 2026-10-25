@@ -12,7 +12,7 @@ const stop = () => {
 process.once('SIGINT', stop);
 process.once('SIGTERM', stop);
 function launch(command, args, cwd) {
-  child = spawn(command, args, { cwd, env: { ...process.env, STATIC_FIXTURE: '0' }, detached: true, stdio: 'inherit' });
+  child = spawn(command, args, { cwd, env: { ...process.env, STATIC_FIXTURE: '0', CF_SEND_TELEMETRY: 'false', DO_NOT_TRACK: '1' }, detached: true, stdio: 'inherit' });
   return once(child, 'exit');
 }
 try {

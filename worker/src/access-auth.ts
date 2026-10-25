@@ -35,7 +35,7 @@ export async function privateBoundary(request: Request, audience: string | undef
       algorithms: ['RS256'], issuer: ISSUER, audience: aud,
       requiredClaims: ['iss', 'aud', 'exp', 'email'], clockTolerance: 5,
     });
-    if (!Number.isFinite(payload.exp) || payload.email !== EMAIL) return privateResponse(401);
+    if (!Number.isFinite(payload.exp) || typeof payload.email !== 'string' || payload.email.toLowerCase() !== EMAIL) return privateResponse(401);
   } catch {
     // Do not log JWTs, identities or upstream errors.
     return privateResponse(401);

@@ -112,6 +112,6 @@ test('missing schema fails safely without success, PII or diagnostics', async ()
       assert.equal(response.headers.get('cache-control'), 'no-store');
     }
     assert.deepEqual(logs, []);
-    assert.equal((await worker.fetch(new Request(origin + '/api/health'), { DB: local.db })).status, 200);
+    assert.equal((await worker.fetch(new Request(origin + '/api/health'), { DB: local.db })).status, 503);
   } finally { console.error = original; await local.dispose(); }
 });
