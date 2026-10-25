@@ -11,7 +11,7 @@
     "build": "astro build",
     "preview": "astro preview --host",
     "astro": "astro",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "astro sync && tsc --noEmit",
     "quality:assert-lighthouse": "node scripts/assert-lighthouse.mjs",
     "seo:audit": "node --import tsx scripts/seo-audit.ts",
     "test:e2e": "playwright test",
