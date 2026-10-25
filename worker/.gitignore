@@ -1,0 +1,8 @@
+node_modules/
+.cloudflare/
+.wrangler/
+dist/
+# Preserved synthetic D1 state from initial direct-runtime RED tests.
+/test/helpers/state-*/
+.env*
+.dev.vars*

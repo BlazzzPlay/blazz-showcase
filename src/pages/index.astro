@@ -58,24 +58,31 @@ const stats = [
 						<p class="contact-desc" id="contact-help">¿Tenés una idea en mente? Completá el formulario y te respondo dentro de 24 horas hábiles.</p>
 					</div>
 
-					<form method="POST" id="contact-form" class="contact-form" novalidate>
+					<form method="POST" id="contact-form" class="contact-form" aria-busy="false" novalidate>
 						<div class="form-grid">
 							<div class="form-group">
 								<label for="name">Nombre</label>
-								<input type="text" id="name" name="name" placeholder="Tu nombre" required class="glass input-field" aria-describedby="contact-help contact-errors" />
+								<input type="text" id="name" name="name" placeholder="Tu nombre" required minlength="2" maxlength="100" class="glass input-field" aria-describedby="contact-help name-hint" />
+								<p id="name-hint" class="field-hint">Entre 2 y 100 caracteres.</p>
+								<p id="name-error" class="field-error" hidden></p>
 							</div>
 							<div class="form-group">
 								<label for="email">Email</label>
-								<input type="email" id="email" name="email" placeholder="tu@email.com" required class="glass input-field" aria-describedby="contact-help contact-errors" />
+								<input type="email" id="email" name="email" placeholder="tu@email.com" required minlength="3" maxlength="254" class="glass input-field" aria-describedby="contact-help" />
+								<p id="email-error" class="field-error" hidden></p>
 							</div>
 						</div>
 						<div class="form-group">
 							<label for="subject">Asunto</label>
-							<input type="text" id="subject" name="subject" placeholder="¿En qué puedo ayudarte?" required class="glass input-field" aria-describedby="contact-help contact-errors" />
+							<input type="text" id="subject" name="subject" placeholder="¿En qué puedo ayudarte?" required minlength="3" maxlength="200" class="glass input-field" aria-describedby="contact-help subject-hint" />
+							<p id="subject-hint" class="field-hint">Entre 3 y 200 caracteres.</p>
+							<p id="subject-error" class="field-error" hidden></p>
 						</div>
 						<div class="form-group">
 							<label for="message">Mensaje</label>
-							<textarea id="message" name="message" rows="5" placeholder="Cuéntame más sobre tu idea..." required class="glass input-field" aria-describedby="contact-help contact-errors"></textarea>
+							<textarea id="message" name="message" rows="5" placeholder="Cuéntame más sobre tu idea..." required minlength="10" maxlength="4000" class="glass input-field" aria-describedby="contact-help message-hint"></textarea>
+							<p id="message-hint" class="field-hint">Entre 10 y 4000 caracteres.</p>
+							<p id="message-error" class="field-error" hidden></p>
 						</div>
 
 						<p id="contact-errors" class="sr-only" role="alert" aria-live="assertive"></p>
@@ -84,7 +91,7 @@ const stats = [
 						<div class="form-actions">
 							<button type="submit" class="btn btn-primary btn-large w-full relative">
 								<span class="btn-text">Registrar Solicitud</span>
-								<span class="btn-spinner hidden">
+								<span class="btn-spinner" aria-hidden="true">
 									<svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
 								</span>
 							</button>
@@ -100,7 +107,7 @@ const stats = [
 <div id="toast-container" class="toast-container"></div>
 
 <script>
-	import { actions } from 'astro:actions';
+	import { postJson } from '../lib/contact-api';
 
 	const form = document.querySelector('#contact-form') as HTMLFormElement;
 	const toastContainer = document.querySelector('#toast-container') as HTMLElement;
@@ -121,13 +128,13 @@ const stats = [
 
 	async function track(event: FunnelEvent, source: FunnelSource) {
 		try {
-			await actions.trackFunnel({
+			await postJson('/api/funnel', {
 				sessionId: getSessionId(),
 				event,
 				source,
 			});
 		} catch {
-			// Tracking best-effort: nunca bloquea la UX principal.
+			// Best-effort tracking never blocks the primary flow.
 		}
 	}
 
@@ -152,18 +159,20 @@ const stats = [
 		}, 5000);
 	}
 
-	function focusFirstErrorField(error: unknown) {
-		if (!error || typeof error !== 'object') return;
-
-		const maybeFields = (error as { fields?: Record<string, string[]> }).fields;
-		if (!maybeFields) return;
-
-		const orderedFields = ['name', 'email', 'subject', 'message'];
-		const firstFieldName = orderedFields.find((field) => maybeFields[field]?.length);
-		if (!firstFieldName) return;
-
-		const input = form?.querySelector(`[name="${firstFieldName}"]`) as HTMLElement | null;
-		input?.focus();
+	const orderedFields = ['name', 'email', 'subject', 'message'] as const;
+	function setFieldErrors(fields: Record<string, string[]> = {}) {
+		for (const name of orderedFields) {
+			const input = form.querySelector(`[name="${name}"]`) as HTMLInputElement | HTMLTextAreaElement;
+			const region = document.getElementById(`${name}-error`)!;
+			const message = fields[name]?.join(' ') ?? '';
+			region.textContent = message;
+			region.hidden = !message;
+			input.setAttribute('aria-invalid', String(Boolean(message)));
+			const hint = name === 'email' ? '' : ` ${name}-hint`;
+			input.setAttribute('aria-describedby', `contact-help${hint}${message ? ` ${name}-error` : ''}`);
+		}
+		const first = orderedFields.find((name) => fields[name]?.length);
+		if (first) (form.elements.namedItem(first) as HTMLElement).focus();
 	}
 
 	let hasTrackedFormStart = false;
@@ -173,47 +182,50 @@ const stats = [
 		void track('form_start', 'contact_form');
 	});
 
+	let isSubmitting = false;
 	form?.addEventListener('submit', async (e) => {
 		e.preventDefault();
-		const formData = new FormData(form);
-		errorRegion.textContent = '';
-		statusRegion.textContent = '';
-		
+		if (isSubmitting) return;
 		const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
 		const btnText = submitBtn.querySelector('.btn-text') as HTMLElement;
-		const btnSpinner = submitBtn.querySelector('.btn-spinner') as HTMLElement;
-		
-		btnText.classList.add('hidden');
-		btnSpinner.classList.remove('hidden');
+		isSubmitting = true;
 		submitBtn.disabled = true;
+		form.setAttribute('aria-busy', 'true');
+		btnText.textContent = 'Registrando solicitud…';
+		statusRegion.textContent = 'Registrando solicitud…';
+		errorRegion.textContent = '';
 
-	try {
-		const { data, error } = await actions.submitContact(formData);
-		
-		if (error) {
-			const message = error.message || 'Error de validación. Revisa los campos.';
-			errorRegion.textContent = message;
-			showToast(message, 'error');
-			focusFirstErrorField(error);
-		} else if (data?.success) {
-				showToast(data.message, 'success');
-				statusRegion.textContent = data.message;
-				await track('form_submit_success', 'contact_form');
+		try {
+			const input = new FormData(form);
+			const data = await postJson('/api/contact', {
+				name: String(input.get('name') ?? ''), email: String(input.get('email') ?? ''),
+				subject: String(input.get('subject') ?? ''), message: String(input.get('message') ?? ''),
+			});
+			setFieldErrors(data.success ? {} : data.fieldErrors);
+			if (!data.success) {
+				const message = data.message;
+				errorRegion.textContent = message;
+				statusRegion.textContent = '';
+				showToast(message, 'error');
+			} else {
+				const message = data.message!;
+				showToast(message, 'success');
+				statusRegion.textContent = message;
 				form.reset();
 				hasTrackedFormStart = false;
-			} else {
-				const message = 'Error desconocido.';
-				errorRegion.textContent = message;
-				showToast(message, 'error');
+				// Saving determines completion; analytics is best-effort and never awaited here.
+				void track('form_submit_success', 'contact_form');
 			}
-		} catch (e) {
+		} catch {
 			const message = 'Error crítico en el servidor.';
 			errorRegion.textContent = message;
+			statusRegion.textContent = '';
 			showToast(message, 'error');
 		} finally {
-			btnText.classList.remove('hidden');
-			btnSpinner.classList.add('hidden');
+			form.setAttribute('aria-busy', 'false');
+			btnText.textContent = 'Registrar Solicitud';
 			submitBtn.disabled = false;
+			isSubmitting = false;
 		}
 	});
 </script>
@@ -282,6 +294,8 @@ const stats = [
 	}
 
 	.contact-content {
+		min-width: 0;
+		overflow-wrap: anywhere;
 		padding: 5rem;
 		border-radius: 2.5rem;
 	}
@@ -304,8 +318,13 @@ const stats = [
 
 	.form-grid {
 		display: grid;
-		grid-template-columns: 1fr 1fr;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 		gap: 1.5rem;
+	}
+
+	.contact-form, .form-grid, .form-group, .form-actions {
+		min-width: 0;
+		width: 100%;
 	}
 
 	.form-group {
@@ -321,11 +340,34 @@ const stats = [
 	}
 
 	.input-field {
+		min-width: 0;
+		width: 100%;
+		max-width: 100%;
+		font-size: 1rem;
+		line-height: 1.5;
 		padding: 0.75rem 1rem;
 		color: white;
 		outline: none;
 		transition: border-color 0.2s;
 		font-family: inherit;
+	}
+
+	.field-hint, .field-error {
+		font-size: 0.875rem;
+		line-height: 1.5;
+		overflow-wrap: anywhere;
+	}
+
+	.field-hint { color: hsl(var(--text-muted)); }
+	.field-error { color: hsl(0 90% 82%); }
+	.field-error[hidden] { display: none; }
+	.input-field[aria-invalid="true"] { border-color: hsl(0 90% 82%); }
+	.input-field::placeholder { color: hsl(var(--text-muted)); opacity: 1; }
+	textarea.input-field { resize: vertical; }
+
+	.input-field:focus-visible {
+		outline: 3px solid hsl(var(--accent-light));
+		outline-offset: 3px;
 	}
 
 	.input-field:focus {
@@ -346,7 +388,7 @@ const stats = [
 	}
 
 	.btn-large {
-		padding: 1.25rem 3rem;
+		padding: 1.25rem clamp(1rem, 4vw, 3rem);
 		font-size: 1.1rem;
 	}
 
@@ -361,8 +403,14 @@ const stats = [
 		width: 100%;
 	}
 
-	.animate-spin {
-		animation: spin 1s linear infinite;
+	.btn-spinner { display: none; }
+	.contact-form[aria-busy="true"] .btn-spinner { display: inline-flex; }
+	.contact-form button { gap: 0.75rem; white-space: normal; }
+	.contact-form button:disabled { cursor: wait; opacity: 0.8; transform: none; }
+	.animate-spin { animation: spin 1s linear infinite; }
+
+	@media (prefers-reduced-motion: reduce) {
+		.contact-form[aria-busy="true"] .btn-spinner { display: none; }
 	}
 
 	@keyframes spin {
@@ -374,6 +422,8 @@ const stats = [
 		position: fixed;
 		bottom: 2rem;
 		right: 2rem;
+		max-width: calc(100vw - 4rem);
+		overflow-wrap: anywhere;
 		display: flex;
 		flex-direction: column;
 		gap: 1rem;

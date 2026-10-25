@@ -1,0 +1,35 @@
+import type { Env } from './env.ts';
+import { publicApi } from './public-api.ts';
+import { privateBoundary } from './access-auth.ts';
+import { privateRoutes } from './private-panel.ts';
+import type { JWTVerifyGetKey } from 'jose';
+
+export function createHandler(keys?: JWTVerifyGetKey) {
+  return {
+    async fetch(request: Request, env: Env): Promise<Response> {
+      const path = new URL(request.url).pathname;
+      const headers = { 'cache-control': 'no-store' };
+      if (path === '/private' || path.startsWith('/private/')) {
+        // The DB binding is read only inside the authorized continuation.
+        return privateBoundary(request, env.ACCESS_AUD, keys, () => privateRoutes(request, env));
+      }
+      if (path === '/api/health' && request.method === 'GET') {
+        try {
+          // Healthy only when both migrated tables exist, not merely when the binding answers.
+          const row = await env.DB.prepare("SELECT COUNT(*) AS ok FROM sqlite_master WHERE type = 'table' AND name IN ('contact_requests', 'contact_funnel_events')").first<{ ok: number }>();
+          if (row?.ok === 2) return Response.json({ ok: true }, { headers });
+        } catch {
+          // Never expose binding errors, SQL, credentials or submitted data.
+        }
+        return Response.json({ ok: false }, { status: 503, headers });
+      }
+      if (path === '/api/contact' || path === '/api/funnel') {
+        return publicApi(request, env, path === '/api/contact');
+      }
+      // Unknown APIs and private paths never reach static asset fallback.
+      return new Response('Not found', { status: 404, headers });
+    },
+  } satisfies ExportedHandler<Env>;
+}
+
+export default createHandler();

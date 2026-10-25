@@ -1,22 +1,22 @@
-import path from 'node:path';
-import { createClient } from '@libsql/client';
 import { expect, test } from '@playwright/test';
+import { openLocalD1 } from '../worker/test/helpers/local-d1.ts';
 
-const dbPath = process.env.DB_PATH || path.join(process.cwd(), 'data', 'sqlite.db');
-const db = createClient({ url: `file:${dbPath}` });
+let local: Awaited<ReturnType<typeof openLocalD1>>;
+test.beforeAll(async () => {
+  if (!process.env.TEST_STACK_STATE) throw new Error('Isolated TEST_STACK_STATE is required');
+  local = await openLocalD1(process.env.TEST_STACK_STATE);
+});
+test.afterAll(async () => { await local?.dispose(); });
 
 async function getSessionEvents(sessionId: string) {
   let lastError: unknown;
 
   for (let attempt = 0; attempt < 5; attempt += 1) {
     try {
-      const result = await db.execute({
-        sql: 'SELECT event, COUNT(*) AS total FROM contact_funnel_events WHERE session_id = ? GROUP BY event',
-        args: [sessionId],
-      });
+      const result = await local.db.prepare('SELECT event, COUNT(*) AS total FROM contact_funnel_events WHERE session_id = ? GROUP BY event').bind(sessionId).all();
 
       const counts = new Map<string, number>();
-      for (const row of result.rows) {
+      for (const row of result.results) {
         counts.set(String(row.event), Number(row.total));
       }
 
@@ -93,6 +93,9 @@ test('desktop: keyboard E2E completes CTA -> form_start -> submit_success funnel
       };
     })
     .toEqual({ cta: 1, start: 1, success: 1 });
+  const row = await local.db.prepare('SELECT name, email, subject, message, is_read FROM contact_requests WHERE subject = ?').bind('Validacion funnel desktop').first();
+  expect(row).toEqual({ name: 'Usuario QA', email: 'qa@example.com', subject: 'Validacion funnel desktop', message: 'Este flujo valida teclado completo y submit exitoso.', is_read: 0 });
+  console.log('REAL browser contact and three funnel events verified in isolated local D1');
 });
 
 test('desktop: abandonment keeps conversion at zero after form_start', async ({ page, isMobile }) => {
@@ -109,7 +112,9 @@ test('desktop: abandonment keeps conversion at zero after form_start', async ({ 
   await heroCta.click();
   await expect.poll(() => new URL(page.url()).hash).toBe('#contacto');
 
-  await page.locator('#name').focus();
+  const started = page.waitForResponse(response => response.url().endsWith('/api/funnel') && response.request().postDataJSON()?.event === 'form_start');
+  await page.locator('#name').click();
+  expect((await started).status()).toBe(200);
 
   await expect
     .poll(async () => {

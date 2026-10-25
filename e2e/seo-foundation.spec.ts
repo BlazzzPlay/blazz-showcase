@@ -1,4 +1,6 @@
 import { expect, test } from '@playwright/test';
+import { readdir } from 'node:fs/promises';
+import { resolve } from 'node:path';
 
 async function expectSingleVisibleH1(page: import('@playwright/test').Page, scopeSelector: string) {
   const h1s = page.locator(`${scopeSelector} h1`);
@@ -23,19 +25,23 @@ test('home SEO foundation: metadata completa, H1 único y JSON-LD parseable', as
   await expect(page).toHaveTitle(/Fabian Mendoza · Blazz/);
   await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /\S+/);
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://blazz.cl/');
+  await expect(page.locator('meta[property="og:url"]')).toHaveAttribute('content', 'https://blazz.cl/');
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'index,follow');
 
   await expectSingleVisibleH1(page, 'main');
   await expectJsonLdParseable(page);
 });
 
-test('admin SEO foundation: ruta no indexable con robots noindex,nofollow', async ({ page }) => {
-  await page.goto('/admin?key=blazz2026');
-
-  await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex,nofollow');
-  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://blazz.cl/admin');
-  await expectSingleVisibleH1(page, 'section.admin');
-  await expectJsonLdParseable(page);
+test('admin SEO foundation: private route denied and absent from static output', async ({ page }) => {
+  for (const route of ['/admin', '/admin/', '/admin?key=legacy']) {
+    const response = await page.goto(route);
+    expect(response?.status()).toBe(404);
+    expect(response?.headers()['cache-control']).toBe('no-store');
+    expect(await response?.text()).toBe('Not found');
+    await expect(page.locator('section.admin, .contact-card')).toHaveCount(0);
+  }
+  const files = await readdir(resolve('dist'), { recursive: true });
+  expect(files.filter(file => /^(admin|private|api)(\/|\.|$)/.test(file))).toEqual([]);
 });
 
 test('páginas objetivo Chile: canonical absoluto, description en rango y H1 único', async ({ page }) => {
@@ -48,6 +54,7 @@ test('páginas objetivo Chile: canonical absoluto, description en rango y H1 ún
   for (const entry of cases) {
     await page.goto(entry.route);
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', entry.canonical);
+    await expect(page.locator('meta[property="og:url"]')).toHaveAttribute('content', entry.canonical);
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'index,follow');
 
     const description = (await page.locator('meta[name="description"]').getAttribute('content')) ?? '';
@@ -60,5 +67,8 @@ test('páginas objetivo Chile: canonical absoluto, description en rango y H1 ún
 
     await expectSingleVisibleH1(page, 'main');
     await expectJsonLdParseable(page);
+    await page.goto(`${entry.route}/`);
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', entry.canonical);
+    await expect(page.locator('meta[property="og:url"]')).toHaveAttribute('content', entry.canonical);
   }
 });

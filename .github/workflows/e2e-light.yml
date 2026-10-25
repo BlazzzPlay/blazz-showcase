@@ -8,26 +8,38 @@ jobs:
   playwright:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install Playwright browser (Chromium)
+          cache-dependency-path: |
+            package-lock.json
+            worker/package-lock.json
+      - name: Install locked frontend and Worker dependencies
+        run: |
+          npm ci
+          npm --prefix worker ci
+      - name: Units and independent types
+        run: |
+          npm run test:unit
+          npm run typecheck
+          npm --prefix worker run typecheck
+          npm --prefix worker run test:api
+      - name: Build static frontend before Worker assets
+        run: |
+          npm run build
+          npm --prefix worker run build
+          npm --prefix worker run test:static
+      - name: Install Playwright browser in CI only
         run: npx playwright install --with-deps chromium
-
-      - name: Run E2E
+      - name: Run local stack E2E without cloud credentials
         run: npm run test:e2e -- --reporter=line
-
+      # The retained foundation suite has a documented cf local CLI exit hang.
+      # It is deliberately separate, not rewritten as passing deployment proof.
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v4
