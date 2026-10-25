@@ -7,17 +7,21 @@ import type { Env } from '../src/env.ts';
 import { audience, jwks, otherKeys, rawToken, token, unsupportedKeys } from './helpers/access-jwt.ts';
 
 const handler = createHandler(createLocalJWKSet(jwks));
-const env = (aud: string | undefined = audience) => ({
+// Denied requests must never touch DB; authorized ones read an empty stub panel.
+const emptyDb = { prepare: () => ({ all: async () => ({ results: [] }) }) };
+const env = (aud: string | undefined = audience, authorized = false) => ({
   ACCESS_AUD: aud,
-  get DB() { throw new Error('Private requests must never access DB in C3a'); },
+  get DB() { if (authorized) return emptyDb; throw new Error('Denied private requests must never access DB'); },
   get ASSETS() { throw new Error('Private requests must never access assets'); },
 }) as unknown as Env;
 async function check(jwt: string | undefined, status = 401, url = 'https://blazz.cl/private', aud: string | undefined = audience, method = 'GET', extra = {}) {
-  const response = await handler.fetch(new Request(url, { method, headers: { ...(jwt ? { 'Cf-Access-Jwt-Assertion': jwt } : {}), ...extra } }), env(aud));
+  const response = await handler.fetch(new Request(url, { method, headers: { ...(jwt ? { 'Cf-Access-Jwt-Assertion': jwt } : {}), ...extra } }), env(aud, status === 200));
   assert.equal(response.status, status);
   assert.equal(response.headers.get('cache-control'), 'no-store');
   assert.equal(response.headers.get('x-robots-tag'), 'noindex');
-  assert.equal(await response.text(), status === 401 ? 'Unauthorized' : 'Not found');
+  const text = await response.text();
+  if (status === 200) assert.match(text, /Panel de <span class="gradient-text">Contactos/);
+  else assert.equal(text, status === 401 ? 'Unauthorized' : 'Not found');
 }
 
 test('configured private boundary rejects missing JWT and forged identity headers', async () => {
@@ -39,9 +43,9 @@ test('canonical origin and all private descendants are guarded for every method'
     }
   }
 });
-test('valid signed identity reaches only the C3a placeholder (no panel or bindings)', async () => {
-  await check(await token(), 404);
-  await check(await token({ aud: [audience, 'another'], email_verified: false }), 404, undefined, ` ${audience} `);
+test('valid signed identity reaches the private panel; legacy admin paths stay absent', async () => {
+  await check(await token(), 200);
+  await check(await token({ aud: [audience, 'another'], email_verified: false }), 200, undefined, ` ${audience} `);
   for (const path of ['/admin', '/admin/', '/admin/nested', '/api/mark-read', '/api/delete']) {
     const response = await handler.fetch(new Request(`https://blazz.cl${path}`, { method: 'POST', headers: { 'Cf-Access-Jwt-Assertion': await token() } }), env());
     assert.equal(response.status, 404);
@@ -51,7 +55,7 @@ test('signature, algorithm, issuer, audience and exact signed email are mandator
   for (const claims of [{ iss: 'https://evil.example' }, { iss: undefined }, { aud: 'wrong' }, { aud: undefined }, { email: undefined }, { email: 'other@gmail.com' }, { email: ' fabianma7@gmail.com' }, { email: 'fabianma7@gmail.com.evil' }, { email: 42 }])
     await check(await token(claims));
   // Email comparison is case-insensitive; whitespace and other identities stay denied.
-  for (const email of ['Fabianma7@gmail.com', 'FABIANMA7@GMAIL.COM']) await check(await token({ email }), 404);
+  for (const email of ['Fabianma7@gmail.com', 'FABIANMA7@GMAIL.COM']) await check(await token({ email }), 200);
   await check(await token({}, {}, otherKeys.privateKey));
   await check(await token({}, { alg: 'RS512' }, unsupportedKeys.privateKey));
   await check(await new SignJWT({}).setProtectedHeader({ alg: 'HS256' }).sign(new Uint8Array(32)));
@@ -62,7 +66,7 @@ test('expiry is required and finite; bounded five-second exp/nbf tolerance', asy
   for (const exp of ['null', '1e999', '-1e999', '"future"', String(now - 10)]) await check(await rawToken(exp));
   await check(await token({ nbf: now + 60 }));
   await check(await rawToken(String(now + 300), '"tomorrow"'));
-  await check(await token({ exp: now - 1, nbf: now + 1 }), 404);
+  await check(await token({ exp: now - 1, nbf: now + 1 }), 200);
 });
 test('malformed, excessive and unknown-key tokens deny; query keys cannot authorize', async () => {
   for (const jwt of ['broken', 'a.b.c', 'x'.repeat(16385), await token({}, { kid: 'unknown' })]) await check(jwt);
@@ -96,8 +100,8 @@ test('remote resolver uses only fixed JWKS, forbids redirects, caches and ignore
   const remote = createHandler(resolver);
   const jwt = await token({}, { jku: 'https://evil.example/keys', x5u: 'https://evil.example/cert' });
   for (let i = 0; i < 2; i++) {
-    const response = await remote.fetch(new Request('https://blazz.cl/private', { headers: { 'Cf-Access-Jwt-Assertion': jwt } }), env());
-    assert.equal(response.status, 404);
+    const response = await remote.fetch(new Request('https://blazz.cl/private', { headers: { 'Cf-Access-Jwt-Assertion': jwt } }), env(audience, true));
+    assert.equal(response.status, 200);
   }
   assert.equal(calls, 1);
   for (const url of ['https://alternate.workers.dev/private', 'https://blazz.cl/private']) {

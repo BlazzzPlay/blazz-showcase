@@ -1,6 +1,7 @@
 import type { Env } from './env.ts';
 import { publicApi } from './public-api.ts';
 import { privateBoundary } from './access-auth.ts';
+import { privateRoutes } from './private-panel.ts';
 import type { JWTVerifyGetKey } from 'jose';
 
 export function createHandler(keys?: JWTVerifyGetKey) {
@@ -9,7 +10,8 @@ export function createHandler(keys?: JWTVerifyGetKey) {
       const path = new URL(request.url).pathname;
       const headers = { 'cache-control': 'no-store' };
       if (path === '/private' || path.startsWith('/private/')) {
-        return privateBoundary(request, env.ACCESS_AUD, keys);
+        // The DB binding is read only inside the authorized continuation.
+        return privateBoundary(request, env.ACCESS_AUD, keys, () => privateRoutes(request, env));
       }
       if (path === '/api/health' && request.method === 'GET') {
         try {

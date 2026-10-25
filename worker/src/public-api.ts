@@ -14,7 +14,7 @@ function failure(message: string, status: number): Response {
 }
 
 // Count bytes while streaming: Content-Length alone is neither required nor trusted.
-async function readBody(request: Request): Promise<unknown> {
+export async function readBody(request: Request): Promise<unknown> {
   const reader = request.body?.getReader();
   if (!reader) throw new Error('json');
   const chunks: Uint8Array[] = [];
@@ -35,7 +35,7 @@ async function readBody(request: Request): Promise<unknown> {
 }
 
 // Release an unread upload before rejecting so keep-alive bridges never reuse a half-read connection.
-async function reject(request: Request, response: Response): Promise<Response> {
+export async function reject(request: Request, response: Response): Promise<Response> {
   if (request.body && !request.bodyUsed) await request.body.cancel().catch(() => undefined);
   return response;
 }

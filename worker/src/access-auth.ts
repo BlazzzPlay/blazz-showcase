@@ -24,7 +24,11 @@ function privateResponse(status: 401 | 404): Response {
   });
 }
 
-export async function privateBoundary(request: Request, audience: string | undefined, keys: JWTVerifyGetKey = trustedKeys): Promise<Response> {
+// Authorized requests are handed to `next`; every denial happens before it runs.
+export async function privateBoundary(
+  request: Request, audience: string | undefined, keys: JWTVerifyGetKey = trustedKeys,
+  next: () => Promise<Response> = async () => privateResponse(404),
+): Promise<Response> {
   if (new URL(request.url).origin !== CANONICAL_ORIGIN) return privateResponse(404);
   const aud = audience?.trim();
   if (!aud) return privateResponse(404);
@@ -40,6 +44,5 @@ export async function privateBoundary(request: Request, audience: string | undef
     // Do not log JWTs, identities or upstream errors.
     return privateResponse(401);
   }
-  // C3b owns all private routing, database access and panel rendering.
-  return privateResponse(404);
+  return next();
 }

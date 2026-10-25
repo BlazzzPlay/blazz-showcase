@@ -66,20 +66,21 @@ Integration tests compare the bundled homepage with actual `dist/index.html`,
 check public metadata and reject private output/legacy database strings.
 Administrative operations remain denied; the independent C3a boundary is described below.
 
-## C3a: fail-closed Access boundary (no private panel)
+## C3a: fail-closed Access boundary
 
 `/private`, its trailing-slash alias and every descendant, for every method,
 require URL origin exactly `https://blazz.cl`. Other origins return404 before
 verification. `ACCESS_AUD` must contain the actual Access application's audience;
 missing/blank configuration returns404. No audience has been provisioned here.
 Configured missing/invalid JWTs return401 with a generic message; private responses
-are `no-store` and `X-Robots-Tag: noindex`. Valid authorization still returns404:
-C3b will implement private routing, panel rendering and database operations.
+are `no-store` and `X-Robots-Tag: noindex`. Only a valid authorization reaches the
+C3b private routes below; the DB binding is never read before that.
 `/admin` and the original mark-read/delete APIs remain404, even with valid tokens.
 
 Only `Cf-Access-Jwt-Assertion` is read (maximum16KiB). Pinned jose6.2.12 verifies
 RS256 signatures, issuer `https://blazzz.cloudflareaccess.com`, configured trimmed
-audience, required finite expiry and exact signed email `fabianma7@gmail.com`.
+audience, required finite expiry and signed email `fabianma7@gmail.com`
+(compared case-insensitively; padded or other identities are denied).
 Expiry and optional nbf use five seconds of clock tolerance. Identity headers,
 query keys and token jku/x5u URLs confer no trust. The module-cached remote JWKS
 uses only the fixed issuer's `/cdn-cgi/access/certs`, a three-second abort timeout,
@@ -91,8 +92,27 @@ The signed email is trusted only as an issuer claim: no nonstandard mandatory
 `email_verified` claim is imposed. Login-provider/mailbox assurance, the one-user
 Access policy, application/AUD provisioning and deployment verification remain
 pending. `npm --prefix worker run test:access` uses ephemeral local RSA keys and
-fake JWKS fetches, with no external Access traffic. C2a's CLI hang and C2b2's
-intermittent local ECONNRESET remain separate delivery blockers, not fixed here.
+fake JWKS fetches, with no external Access traffic. C2a's CLI hang remains a
+separate delivery blocker.
+
+## C3b: private contacts panel
+
+After Access authorization (`src/private-panel.ts`):
+
+| Route | Behavior |
+| --- | --- |
+| `GET`/`HEAD /private`, `/private/` | Server-rendered Spanish panel: contacts newest first, total and unread counts, escaped name/email/subject/message, es-CL dates in America/Santiago. Other methods return405. |
+| `POST /private/api/mark-read` | JSON `{"id": <positive safe integer>}`; marks one row read. |
+| `POST /private/api/delete` | Same body; deletes one row (the UI asks for confirmation). |
+
+Mutations require same-origin `Origin` (403, CSRF protection because Access uses a
+cookie) and `application/json` (415); other methods return405 with `Allow: POST`.
+Any other body shape returns400 `Identificador inválido.`, an unknown id returns404
+`Solicitud no encontrada.`, success returns `{"success":true}`. Rejected requests
+change no rows. Other `/private/*` paths return404. Responses are `no-store`,
+`noindex`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, and the panel
+sends a per-response nonce CSP (`default-src 'none'`, `frame-ancestors 'none'`).
+`npm --prefix worker run test:access` covers these with local D1 and local JWTs.
 
 ## Foundation proof and unresolved C2a
 
@@ -232,9 +252,9 @@ passing browser run. These are disclosed local beta-tooling risks, not cloud
 readiness evidence. The foundation CLI termination failure remains distinct,
 unchanged and not rerun in this correction.
 
-C3a verification remains Worker-owned and fail closed. C3b must preserve this
-boundary before panel access and every future administrative mutation.
-No private HTML, key redirects or privileged Astro routes are restored here.
+C3a verification remains Worker-owned and fail closed; the C3b panel and every
+administrative mutation run only after it. No key redirects or privileged Astro
+routes are restored; the private panel is rendered by the Worker only.
 Do not certify CLI/deployment compatibility until C2a is resolved. Migration,
 Access provisioning, deployment and DNS remain separate authorization gates.
 
