@@ -84,7 +84,8 @@ audience, required finite expiry and signed email `fabianma7@gmail.com`
 Expiry and optional nbf use five seconds of clock tolerance. Identity headers,
 query keys and token jku/x5u URLs confer no trust. The module-cached remote JWKS
 uses only the fixed issuer's `/cdn-cgi/access/certs`, a three-second abort timeout,
-ten-minute cache and thirty-second refresh cooldown; fetch redirects are errors.
+ten-minute cache and thirty-second refresh cooldown. Redirects are never followed
+(`redirect: 'manual'`, since workerd rejects `'error'`); any non-200 JWKS response denies.
 Factory-only key/fetch injection supports local tests, never request/env overrides.
 No tokens, identities or upstream errors are logged.
 

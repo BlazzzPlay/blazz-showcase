@@ -12,7 +12,9 @@ export function createAccessKeyResolver(fetcher: typeof fetch = fetch) {
     timeoutDuration: 3000,
     cooldownDuration: 30000,
     cacheMaxAge: 600000,
-    [customFetch]: (url, options) => fetcher(url, { ...options, redirect: 'error' }),
+    // workerd rejects redirect:'error'; 'manual' returns any 3xx unfollowed and jose
+    // requires 200 OK, so a redirected JWKS still fails closed.
+    [customFetch]: (url, options) => fetcher(url, { ...options, redirect: 'manual' }),
   });
 }
 const trustedKeys = createAccessKeyResolver();
