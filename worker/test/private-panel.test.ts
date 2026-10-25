@@ -118,3 +118,26 @@ test('unauthenticated or wrong identity never reads or mutates the database', as
     assert.deepEqual(await rows(env), before);
   } finally { await local.dispose(); }
 });
+
+test('database failures return generic 503 without leaking errors or changing rows', async () => {
+  const failing = { ACCESS_AUD: audience, DB: {
+    prepare() { throw new Error('D1_ERROR: secret table detail'); },
+  } } as unknown as Env;
+  const logs: unknown[] = [];
+  const original = console.error;
+  console.error = (...args: unknown[]) => { logs.push(args); };
+  try {
+    const panel = await call(failing, '/private');
+    assert.equal(panel.status, 503);
+    assert.equal(panel.headers.get('cache-control'), 'no-store');
+    assert.equal(panel.headers.get('x-robots-tag'), 'noindex');
+    assert.equal(await panel.text(), 'Servicio no disponible');
+    for (const action of ['mark-read', 'delete']) {
+      const response = await mutate(failing, action, { id: 1 });
+      assert.equal(response.status, 503, action);
+      assert.equal(response.headers.get('cache-control'), 'no-store');
+      assert.deepEqual(await response.json(), { success: false, message: 'No se pudo completar la acción.' });
+    }
+  } finally { console.error = original; }
+  assert.deepEqual(logs, [], 'no error details are logged');
+});
