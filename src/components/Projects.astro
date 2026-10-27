@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import educalImg from '../assets/projects/educal.webp';
+import davinciImg from '../assets/projects/davinci.webp';
 
 const projects = [
   {
@@ -9,6 +10,14 @@ const projects = [
     image: educalImg,
     tags: ['React', 'TypeScript', 'Vercel', 'SaaS', 'EdTech'],
     link: 'https://educal-chile.vercel.app/',
+    badge: 'Producción'
+  },
+  {
+    title: 'Leonardo Da Vinci School',
+    description: 'Sitio institucional del colegio Leonardo Da Vinci School de Pitrufquén: noticias, comunidad, equipo docente y accesos a pagos y apoderados, con CMS para que el colegio publique contenido de forma autónoma.',
+    image: davinciImg,
+    tags: ['Astro', 'TypeScript', 'Cloudflare', 'Sveltia CMS', 'Educación'],
+    link: 'https://leonardodavincischool.cl/',
     badge: 'Producción'
   }
 ];
