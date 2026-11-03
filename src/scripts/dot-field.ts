@@ -3,10 +3,10 @@
 // Inspired by the hero background of premiostech.la; vanilla canvas 2D, no deps.
 
 const GRID = 28; // px between dots
-const BASE_RADIUS = 1.25;
-const BASE_ALPHA = 0.3;
+const BASE_RADIUS = 1.6;
+const BASE_ALPHA = 0.5;
 
-const REPULSION = { radius: 130, strength: 26 };
+const REPULSION = { radius: 170, strength: 36 };
 const WAVE = { speed: 1100, width: 110, strength: 22, swell: 0.9, glow: 0.55, life: 1.6, max: 3 };
 const GATHER = { radius: 170, strength: 20, chargeTime: 0.9 };
 const SPRING = 0.14; // how fast a dot follows its target offset
@@ -92,7 +92,8 @@ export function initDotField(canvas: HTMLCanvasElement) {
           const reach = press ? Math.max(f, 1 - dist / GATHER.radius) : f;
           tx += (dx / dist) * push * reach * reach;
           ty += (dy / dist) * push * reach * reach;
-          glow += f * 0.45;
+          glow += f * 0.6;
+          swell += f * 0.6;
           if (press) {
             tx += (Math.random() - 0.5) * 1.4 * charge;
             ty += (Math.random() - 0.5) * 1.4 * charge;
