@@ -131,7 +131,8 @@ export function initDotField(canvas: HTMLCanvasElement) {
 
   function loop(now: number) {
     const moving = draw(now, true);
-    frame = moving || pointer.active ? requestAnimationFrame(loop) : 0;
+    // Sleep as soon as every dot has settled; pointermove/pointerdown wake the loop again.
+    frame = moving ? requestAnimationFrame(loop) : 0;
     if (!frame) last = 0;
   }
 
