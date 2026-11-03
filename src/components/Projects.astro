@@ -2,6 +2,7 @@
 import { Image } from 'astro:assets';
 import educalImg from '../assets/projects/educal.webp';
 import davinciImg from '../assets/projects/davinci.webp';
+import educaImg from '../assets/projects/educa.webp';
 
 const projects = [
   {
@@ -18,6 +19,14 @@ const projects = [
     image: davinciImg,
     tags: ['Astro', 'TypeScript', 'Cloudflare', 'Sveltia CMS', 'Educación'],
     link: 'https://leonardodavincischool.cl/',
+    badge: 'Producción'
+  },
+  {
+    title: 'EDUCA Visión de Futuro',
+    description: 'Sitio de EDUCA, consultora de capacitación, asesoría y evaluación para instituciones educacionales en Chile, con formulario de contacto propio y panel privado para gestionar las solicitudes.',
+    image: educaImg,
+    tags: ['Astro', 'TypeScript', 'Cloudflare Workers', 'D1', 'Educación'],
+    link: 'https://educavisiondefuturo.cl/',
     badge: 'Producción'
   }
 ];
