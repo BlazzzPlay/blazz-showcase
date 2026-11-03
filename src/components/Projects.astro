@@ -39,7 +39,7 @@ const projects = [
       <p class="section-description">Una muestra de las soluciones digitales que he desarrollado recientemente.</p>
     </div>
     
-    <div class="projects-grid">
+    <div class="projects-grid" data-reveal-stagger>
       {projects.map(project => (
         <article class="project-card glass" aria-labelledby={`project-${project.title.replace(/\s+/g, '-').toLowerCase()}-title`}>
           <div class="project-image">
