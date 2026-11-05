@@ -61,3 +61,32 @@ test('mobile 390px: no horizontal overflow and projects stack vertically', async
   expect(boxes[1].top).toBeGreaterThan(boxes[0].top);
   expect(boxes[2].top).toBeGreaterThan(boxes[1].top);
 });
+
+for (const path of ['/servicios', '/contacto', '/portfolio']) {
+  for (const colorScheme of ['light', 'dark'] as const) {
+    test(`${path} ${colorScheme}: theme, no overflow, panel link and mobile menu`, async ({ browser }) => {
+      const ctx = await browser.newContext({ colorScheme, viewport: { width: 390, height: 900 } });
+      const page = await ctx.newPage();
+      await page.goto(path);
+      await expect(page.locator('html')).toHaveAttribute('data-theme', colorScheme);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBe(0);
+      await expect(page.getByRole('link', { name: 'Panel de contactos' })).toBeVisible();
+      const menuBtn = page.locator('.mobile-menu-btn');
+      await menuBtn.click();
+      await expect(menuBtn).toHaveAttribute('aria-expanded', 'true');
+      await page.keyboard.press('Escape');
+      await expect(menuBtn).toHaveAttribute('aria-expanded', 'false');
+      await ctx.close();
+    });
+  }
+}
+
+test('mobile sticky CTA is hidden at the top and reachable once shown', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  const cta = page.locator('.mobile-cta');
+  await expect(cta).toBeHidden();
+  await page.locator('#como').scrollIntoViewIfNeeded();
+  await expect(cta).toBeVisible();
+  await expect(cta).toHaveAccessibleName('Contar mi proyecto');
+});

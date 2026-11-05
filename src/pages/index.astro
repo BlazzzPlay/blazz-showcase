@@ -159,7 +159,7 @@ const faqs = [
 			</div>
 		</section>
 	</main>
-	<a href="#contacto" class="btn btn-primary mobile-cta" tabindex="-1" aria-hidden="true">Contar mi proyecto</a>
+	<a href="#contacto" class="btn btn-primary mobile-cta">Contar mi proyecto</a>
 	<Footer />
 </Layout>
 
@@ -683,11 +683,15 @@ const faqs = [
 			z-index: 90;
 			padding: 1rem;
 			transform: translateY(160%);
-			transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+			visibility: hidden;
+			transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1), visibility 0s linear 0.35s;
 		}
 
+		/* visibility keeps the off-screen CTA out of the tab order and the accessibility tree. */
 		.mobile-cta.show {
 			transform: none;
+			visibility: visible;
+			transition-delay: 0s;
 		}
 
 		:global(.container) {

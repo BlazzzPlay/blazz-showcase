@@ -16,3 +16,4 @@ Implement design/portfolio-redesign/04-claro-colegios-v2.html (mobile: 05) in th
 - L1 "si primero pasamos la 4 y las pruebas" (after: "usa playgrau para revisar la web antes de que desplegemos")
 - L2 Design: design/portfolio-redesign/, chosen artboard 04-claro-colegios-v2.html (mobile 05); 01-03 are alternatives.
 - L3 Evidence: npm run build OK; Playwright 61 passed, 5 skipped, 0 failed (incl. new e2e/theme-and-layout.spec.ts). Hero copy test updated to new headline/CTA by request. Privacy link not added: /privacidad page does not exist.
+- L4 Independent verify (gentle-ai-verify): S1,S2,S4,S5 met; S3 unmet only for privacy link (no /privacidad page). Fixed advisory: mobile sticky CTA was aria-hidden while visible. Added regression tests for /servicios,/contacto,/portfolio light/dark. Playwright 75 passed, 5 skipped.
