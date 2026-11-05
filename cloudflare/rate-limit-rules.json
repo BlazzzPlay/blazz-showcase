@@ -1,0 +1,13 @@
+{
+  "name": "blazz rate limits",
+  "kind": "zone",
+  "phase": "http_ratelimit",
+  "rules": [
+    {
+      "description": "Limit API writes per IP",
+      "action": "block",
+      "expression": "(starts_with(http.request.uri.path, \"/api/\") and http.request.method eq \"POST\")",
+      "ratelimit": { "characteristics": ["ip.src", "cf.colo.id"], "period": 10, "requests_per_period": 5, "mitigation_timeout": 10 }
+    }
+  ]
+}

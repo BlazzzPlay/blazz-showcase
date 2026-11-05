@@ -1,0 +1,17 @@
+{
+  "name": "blazz custom firewall",
+  "kind": "zone",
+  "phase": "http_request_firewall_custom",
+  "rules": [
+    {
+      "description": "Block common vulnerability probes",
+      "action": "block",
+      "expression": "(http.request.uri.path contains \"/wp-\") or (http.request.uri.path contains \"xmlrpc.php\") or (starts_with(http.request.uri.path, \"/.env\")) or (starts_with(http.request.uri.path, \"/.git\")) or (http.request.uri.path contains \"phpmyadmin\") or (http.request.uri.path contains \"/cgi-bin\") or (ends_with(http.request.uri.path, \".php\")) or (http.request.uri.path contains \"/vendor/phpunit\")"
+    },
+    {
+      "description": "Block empty and attack-tool user agents",
+      "action": "block",
+      "expression": "(http.user_agent eq \"\") or (lower(http.user_agent) contains \"sqlmap\") or (lower(http.user_agent) contains \"nikto\") or (lower(http.user_agent) contains \"masscan\") or (lower(http.user_agent) contains \"zgrab\") or (lower(http.user_agent) contains \"nuclei\") or (lower(http.user_agent) contains \"acunetix\") or (lower(http.user_agent) contains \"wpscan\")"
+    }
+  ]
+}
