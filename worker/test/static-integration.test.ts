@@ -82,7 +82,7 @@ test('static output contains only public routes, canonical metadata and no legac
   const sitemap = await readFile(resolve(dist, 'sitemap-0.xml'), 'utf8');
   assert.equal(await readFile(resolve(root, 'worker/.cloudflare/output/v0/workers/default/assets/sitemap-0.xml'), 'utf8'), sitemap);
   assert.deepEqual([...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1]).sort(),
-    ['https://blazz.cl/', 'https://blazz.cl/contacto', 'https://blazz.cl/portfolio', 'https://blazz.cl/servicios']);
+    ['https://blazz.cl/', 'https://blazz.cl/contacto', 'https://blazz.cl/portfolio', 'https://blazz.cl/privacidad', 'https://blazz.cl/servicios']);
   for (const file of files) {
     assert.doesNotMatch(file.slice(dist.length), /^\/(admin|api|private|server)(\/|\.)/);
     if (/\.(html|js|xml)$/.test(file)) {
