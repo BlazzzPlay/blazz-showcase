@@ -1,0 +1,135 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/Navigation.astro';
+import Footer from '../components/Footer.astro';
+import { resolveSeoPage } from '../lib/seo/catalog';
+
+const privacidadSeo = resolveSeoPage('/privacidad');
+---
+
+<Layout seo={privacidadSeo}>
+  <Navigation />
+  <main class="section-padding" id="inicio">
+    <article class="container legal" aria-labelledby="privacidad-title">
+      <p class="eyebrow">Tus datos</p>
+      <h1 id="privacidad-title">Política de privacidad</h1>
+      <p class="updated">Última actualización: 5 de noviembre de 2026</p>
+
+      <section>
+        <h2>Responsable</h2>
+        <p>
+          El responsable de los datos recopilados en este sitio es Fabian Mendoza, Chile. Podés
+          escribirme a <a href="mailto:blazzzplay@gmail.com">blazzzplay@gmail.com</a>.
+        </p>
+      </section>
+
+      <section>
+        <h2>Formulario de contacto</h2>
+        <p>
+          Cuando enviás el formulario de contacto, se guardan tu nombre, tu correo, el asunto y el
+          mensaje en una base de datos alojada en Cloudflare (D1), junto con la fecha de envío. Uso
+          estos datos solo para responder tu solicitud.
+        </p>
+      </section>
+
+      <section>
+        <h2>Medición del formulario</h2>
+        <p>
+          Para entender si el formulario funciona, el sitio registra eventos anónimos: clic en un botón
+          de contacto (<code>cta_click</code>), inicio del formulario (<code>form_start</code>) y envío
+          exitoso (<code>form_submit_success</code>). Cada evento va asociado a un identificador
+          aleatorio de sesión guardado en el <code>sessionStorage</code> de tu navegador, que se borra
+          al cerrar la pestaña. Este identificador no incluye tu nombre ni tu correo.
+        </p>
+      </section>
+
+      <section>
+        <h2>Preferencia de tema</h2>
+        <p>
+          Si cambiás entre modo claro y oscuro, tu elección se guarda en el <code>localStorage</code>
+          de tu navegador con la clave <code>fm-theme</code>. No se envía a ningún servidor.
+        </p>
+      </section>
+
+      <section>
+        <h2>Servicios de terceros</h2>
+        <p>
+          Las tipografías se cargan desde Google Fonts, por lo que tu navegador se conecta a los
+          servidores de Google, que reciben datos técnicos como tu dirección IP. El sitio se sirve
+          mediante Cloudflare.
+        </p>
+      </section>
+
+      <section>
+        <h2>Conservación</h2>
+        <p>
+          Los datos se conservan mientras sean necesarios para responder tu solicitud o hasta que pidas
+          su eliminación.
+        </p>
+      </section>
+
+      <section>
+        <h2>Tus derechos</h2>
+        <p>
+          De acuerdo con la Ley N° 19.628 sobre protección de la vida privada, podés solicitar el
+          acceso, la rectificación o la eliminación de tus datos escribiendo a
+          <a href="mailto:blazzzplay@gmail.com">blazzzplay@gmail.com</a>.
+        </p>
+      </section>
+    </article>
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  .legal {
+    max-width: 760px;
+    padding: 2.5rem clamp(1.25rem, 4vw, 3rem);
+    background: var(--surface);
+    border: 1px solid var(--glass-border);
+    border-radius: 1.5rem;
+    overflow-wrap: anywhere;
+  }
+
+  .eyebrow {
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: hsl(var(--accent-light));
+    font-weight: 700;
+    margin-bottom: 1rem;
+    font-size: 0.8rem;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 5vw, 3rem);
+    margin-bottom: 0.5rem;
+  }
+
+  .updated {
+    color: hsl(var(--text-muted));
+    font-size: 0.875rem;
+    margin-bottom: 2rem;
+  }
+
+  section + section {
+    margin-top: 1.75rem;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    color: hsl(var(--text-muted));
+    line-height: 1.7;
+  }
+
+  a {
+    color: hsl(var(--accent-light));
+  }
+
+  code {
+    font-size: 0.9em;
+  }
+</style>

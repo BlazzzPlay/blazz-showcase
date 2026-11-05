@@ -90,3 +90,23 @@ test('mobile sticky CTA is hidden at the top and reachable once shown', async ({
   await expect(cta).toBeVisible();
   await expect(cta).toHaveAccessibleName('Contar mi proyecto');
 });
+
+test('footer links to the privacy policy page', async ({ page }) => {
+  await page.goto('/');
+  const link = page.locator('footer').getByRole('link', { name: 'Política de privacidad' });
+  await expect(link).toBeVisible();
+  await expect(link).toHaveAttribute('href', '/privacidad');
+});
+
+test('/privacidad: single h1, legal references and no overflow at 390px', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const res = await page.goto('/privacidad');
+  expect(res?.status()).toBe(200);
+  const h1 = page.locator('main h1');
+  await expect(h1).toHaveCount(1);
+  await expect(h1).toBeVisible();
+  await expect(h1).toHaveText('Política de privacidad');
+  await expect(page.locator('main')).toContainText('Ley N° 19.628');
+  await expect(page.locator('main')).toContainText('blazzzplay@gmail.com');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
+});
