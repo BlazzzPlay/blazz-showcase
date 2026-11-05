@@ -41,6 +41,16 @@ export const seoCatalog: Record<string, SeoPageConfig> = {
     supportIntent: 'servicio-general-cl',
     cityMention: 'Santiago',
   },
+  '/privacidad': {
+    title: 'Política de privacidad y datos en Chile',
+    description:
+      'Conocé qué datos recopila este sitio de Fabian Mendoza, para qué se usan y cómo ejercer tus derechos según la Ley N° 19.628 en Chile.',
+    image: '/projects/project1.webp',
+    indexable: true,
+    intent: 'servicio-general-cl',
+    supportIntent: 'contacto-conversion-cl',
+    cityMention: 'Santiago',
+  },
   '/admin': {
     title: 'Panel interno de administración',
     description:

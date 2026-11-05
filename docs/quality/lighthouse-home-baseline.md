@@ -13,6 +13,8 @@
 | Before (mobile) | 2026-04-11 | Local dev (`astro dev`, Chromium Playwright, LH mobile default) | **96** | **65** | `docs/quality/lighthouse/before-mobile.json` |
 | After (desktop) | 2026-04-11 | Local dev (`astro dev`, Chromium Playwright, LH preset desktop) | **96** | **95** | `docs/quality/lighthouse/after-desktop.json` |
 | After (mobile) | 2026-04-11 | Local dev (`astro dev`, Chromium Playwright, LH mobile default) | **96** | **70** | `docs/quality/lighthouse/after-mobile.json` |
+| Redesign (desktop) | 2026-11-05 | `astro preview` build, Chromium Playwright, LH 12.6.0 preset desktop | **96** | **99** | `docs/quality/lighthouse/after-desktop.json` (before = previous after) |
+| Redesign (mobile) | 2026-11-05 | `astro preview` build, Chromium Playwright, LH 12.6.0 mobile default | **96** | **96** | `docs/quality/lighthouse/after-mobile.json` (before = previous after) |
 
 ### Lectura rápida
 - Target de Accessibility (**>=95**) en home: **cumplido** en desktop y mobile.

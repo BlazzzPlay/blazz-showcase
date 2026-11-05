@@ -8,11 +8,39 @@ import Footer from '../components/Footer.astro';
 
 const homeSeo = resolveSeoPage('/');
 
-const stats = [
-  { value: '+10', label: 'Años de experiencia' },
-  { value: 'SaaS', label: 'Desarrollo & EdTech' },
-  { value: '2015', label: 'Titulado Ing. Informática' },
-  { value: 'Chile', label: 'Base de operaciones' },
+const needs = [
+  {
+    title: 'Un sitio que el colegio edite solo',
+    body: 'Noticias, comunidad y docentes con un CMS simple. Sin pedirle cambios a un proveedor.',
+    example: { label: 'Leonardo Da Vinci School', href: 'https://leonardodavincischool.cl/' },
+    icon: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 14h5"/>',
+  },
+  {
+    title: 'Una plataforma para tu equipo',
+    body: 'Producto SaaS a medida: gestión, evaluación y reportes, construido para escalar.',
+    example: { label: 'EduCal Chile', href: 'https://educal-chile.vercel.app/' },
+    icon: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+  },
+  {
+    title: 'Menos trabajo manual',
+    body: 'Formularios, paneles y flujos automatizados que eliminan planillas y errores repetitivos.',
+    example: { label: 'panel de EDUCA', href: 'https://educavisiondefuturo.cl/' },
+    icon: '<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
+  },
+];
+
+const steps = [
+  { title: 'Conversación', body: 'Entiendo el problema y quién lo vive.' },
+  { title: 'Propuesta', body: 'Alcance, arquitectura y plazos por escrito.' },
+  { title: 'Construcción', body: 'Entregas cortas que podés probar.' },
+  { title: 'Puesta en marcha', body: 'Producción, capacitación y soporte.' },
+];
+
+const faqs = [
+  { q: '¿Mi equipo va a poder editar el sitio sin saber programar?', a: 'Sí. Uso un CMS visual y dejo una capacitación grabada para que noticias, docentes y documentos se actualicen sin pedir ayuda.' },
+  { q: '¿Cuánto demora un sitio institucional?', a: 'Depende del alcance; en la propuesta escrita te entrego plazos por etapa antes de empezar.' },
+  { q: '¿Quién queda como dueño del dominio y los datos?', a: 'El colegio. Dominio, cuentas y contenido quedan a nombre de la institución desde el primer día.' },
+  { q: '¿Ofrecés soporte después del lanzamiento?', a: 'Sí, la puesta en marcha incluye un período de soporte y luego podés seguir con mantención mensual si lo necesitás.' },
 ];
 ---
 
@@ -20,42 +48,71 @@ const stats = [
 	<Navigation />
 	<main>
 		<Hero />
-		<Projects />
 		
-		<section id="sobre-mi" class="about section-padding" data-animate="fade-up" aria-labelledby="about-title">
+		<section id="que-hago" class="needs section-padding" data-animate="fade-up" aria-labelledby="needs-title">
 			<div class="container">
-				<div class="glass about-content">
-					<div class="about-header text-center">
-						<p class="tagline uppercase tracking-widest font-semibold mb-3">Sobre mí</p>
-						<h2 class="section-title" id="about-title">Construyendo el <span class="gradient-text">futuro digital</span></h2>
-					</div>
-					<div class="about-grid">
-						<div class="about-text" data-reveal-stagger>
-							<p>Soy <strong>Fabian Mendoza</strong>, Ingeniero en Informática con más de una década de experiencia apasionado por transformar la educación y la gestión administrativa a través de la tecnología.</p>
-							<p>Actualmente me desempeño como <strong>Jefe de Informática en Colegio Montessori</strong>, donde lidero proyectos de transformación digital. En paralelo, desarrollo soluciones <strong>SaaS como EduCal Chile</strong>, diseñadas para optimizar la labor docente.</p>
-							<p>Mi enfoque combina una sólida base técnica en desarrollo de software (React, TypeScript, Node.js) con una visión estratégica para resolver problemas reales del sistema educativo chileno.</p>
-						</div>
-					</div>
-					
-					<div class="stats-grid">
-						{stats.map(s => (
-							<div class="stat-card glass">
-								<span class="stat-value gradient-text">{s.value}</span>
-								<span class="stat-label">{s.label}</span>
-							</div>
-						))}
-					</div>
+				<div class="section-head">
+					<p class="eyebrow">Qué hago</p>
+					<h2 class="section-title" id="needs-title">Elegí lo que necesitás resolver</h2>
+					<p class="section-lede">Tres formas concretas de ayudar a tu institución, con ejemplos reales que podés visitar hoy.</p>
+				</div>
+				<div class="needs-grid" data-reveal-stagger>
+					{needs.map((n) => (
+						<article class="need-card">
+							<span class="need-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" set:html={n.icon} /></span>
+							<h3>{n.title}</h3>
+							<p class="need-body">{n.body}</p>
+							<p class="need-example">Ejemplo: <a href={n.example.href} target="_blank" rel="noopener noreferrer">{n.example.label} <span aria-hidden="true">↗</span><span class="sr-only">(abre en una nueva pestaña)</span></a></p>
+						</article>
+					))}
+				</div>
+			</div>
+		</section>
+
+		<Projects />
+
+		<section id="como" class="process section-padding" data-animate="fade-up" aria-labelledby="process-title">
+			<div class="container">
+				<div class="section-head">
+					<p class="eyebrow">Cómo trabajo</p>
+					<h2 class="section-title" id="process-title">De la idea a producción, en etapas</h2>
+				</div>
+				<ol class="steps" data-reveal-stagger>
+					{steps.map((step, i) => (
+						<li class="step">
+							<span class="step-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+							<h3>{step.title}</h3>
+							<p>{step.body}</p>
+						</li>
+					))}
+				</ol>
+			</div>
+		</section>
+
+		<section id="faq" class="faq section-padding" data-animate="fade-up" aria-labelledby="faq-title">
+			<div class="container">
+				<div class="section-head">
+					<p class="eyebrow">Preguntas frecuentes</p>
+					<h2 class="section-title" id="faq-title">Lo que suelen preguntar los colegios</h2>
+				</div>
+				<div class="faq-list" data-reveal-stagger>
+					{faqs.map((f) => (
+						<details class="faq-item">
+							<summary>{f.q}</summary>
+							<p>{f.a}</p>
+						</details>
+					))}
 				</div>
 			</div>
 		</section>
 
 		<section id="contacto" class="contact section-padding" data-animate="fade-up" aria-labelledby="contact-title">
 			<div class="container">
-				<div class="glass contact-content max-w-4xl mx-auto">
-					<div class="contact-header text-center mb-10">
-						<p class="tagline uppercase tracking-widest font-semibold mb-3">Contacto</p>
-						<h2 class="section-title" id="contact-title">Hablemos de tu <span class="gradient-text">próximo proyecto</span></h2>
-						<p class="contact-desc" id="contact-help">¿Tenés una idea en mente? Completá el formulario y te respondo dentro de 24 horas hábiles.</p>
+				<div class="contact-content">
+					<div class="contact-header">
+						<p class="eyebrow">Contacto</p>
+						<h2 class="section-title" id="contact-title">Contame qué querés <span class="gradient-text">construir</span></h2>
+						<p class="contact-desc" id="contact-help">Completá el formulario y te respondo dentro de 24 horas hábiles.</p>
 					</div>
 
 					<form method="POST" id="contact-form" class="contact-form" aria-busy="false" novalidate>
@@ -96,11 +153,13 @@ const stats = [
 								</span>
 							</button>
 						</div>
+						<p class="contact-alt">O escribime a <a href="mailto:blazzzplay@gmail.com">blazzzplay@gmail.com</a>.</p>
 					</form>
 				</div>
 			</div>
 		</section>
 	</main>
+	<a href="#contacto" class="btn btn-primary mobile-cta">Contar mi proyecto</a>
 	<Footer />
 </Layout>
 
@@ -108,6 +167,18 @@ const stats = [
 
 <script>
 	import { postJson } from '../lib/contact-api';
+
+	// Mobile sticky CTA: visible after the hero, hidden once the contact section is on screen.
+	const mobileCta = document.querySelector('.mobile-cta') as HTMLElement | null;
+	const contactSection = document.getElementById('contacto');
+	if (mobileCta && contactSection) {
+		const onScroll = () => {
+			const show = window.scrollY > window.innerHeight * 0.8 && contactSection.getBoundingClientRect().top > window.innerHeight;
+			mobileCta.classList.toggle('show', show);
+		};
+		window.addEventListener('scroll', onScroll, { passive: true });
+		onScroll();
+	}
 
 	const form = document.querySelector('#contact-form') as HTMLFormElement;
 	const toastContainer = document.querySelector('#toast-container') as HTMLElement;
@@ -235,85 +306,196 @@ const stats = [
 		overflow-x: hidden;
 	}
 
-	.tagline {
-		color: hsl(var(--primary-light));
-		font-size: 0.8rem;
-		letter-spacing: 0.2em;
+	.section-head {
+		max-width: 60ch;
+		margin-bottom: 2.5rem;
 	}
 
-	.about-content {
-		padding: 5rem;
-		border-radius: 2rem;
+	.section-head .section-title {
+		margin-bottom: 1rem;
 	}
 
-	.about-text {
-		max-width: 800px;
-		margin: 0 auto 5rem;
-		text-align: center;
-	}
-
-	.about-text p {
-		font-size: 1.125rem;
-		line-height: 1.8;
+	.section-lede {
 		color: hsl(var(--text-muted));
-		margin-bottom: 1.5rem;
+		font-size: 1.1rem;
 	}
 
-	.stats-grid {
+	.section-padding {
+		padding: 6rem 0;
+	}
+
+	.needs-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-		gap: 2rem;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 1.25rem;
 	}
 
-	.stat-card {
-		padding: 2.5rem;
-		text-align: center;
-		transition: transform 0.3s ease;
-		border-radius: 1.5rem;
+	.need-card {
+		display: flex;
+		flex-direction: column;
+		padding: 1.75rem;
+		border-radius: 1rem;
+		background: var(--surface);
+		border: 1px solid var(--glass-border);
+		transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 	}
 
-	.stat-card:hover {
-		transform: scale(1.05);
+	.need-card:hover {
+		transform: translateY(-4px);
 		border-color: hsl(var(--primary-light) / 0.5);
+		box-shadow: 0 10px 40px -10px hsl(var(--primary) / 0.3);
 	}
 
-	.stat-value {
-		display: block;
-		font-family: var(--font-display);
-		font-size: 3rem;
-		font-weight: 800;
+	.need-icon {
+		width: 44px;
+		height: 44px;
+		display: grid;
+		place-items: center;
+		border-radius: 0.75rem;
+		margin-bottom: 1rem;
+		background: hsl(var(--primary) / 0.12);
+		color: hsl(var(--primary-light));
+	}
+
+	.need-card h3 {
+		font-size: 1.25rem;
 		margin-bottom: 0.5rem;
 	}
 
-	.stat-label {
-		font-size: 0.85rem;
+	.need-body {
 		color: hsl(var(--text-muted));
+		margin-bottom: 1rem;
+		flex: 1;
+	}
+
+	.need-example {
+		font-size: 0.9rem;
+		padding-top: 0.9rem;
+		border-top: 1px solid var(--glass-border);
+		overflow-wrap: anywhere;
+	}
+
+	.need-example a {
 		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
+		color: hsl(var(--primary-light));
+	}
+
+	.steps {
+		list-style: none;
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 1.5rem;
+	}
+
+	.step {
+		padding-top: 1rem;
+		border-top: 3px solid hsl(var(--primary-light));
+	}
+
+	.step-num {
+		font-weight: 800;
+		color: hsl(var(--primary-light));
+	}
+
+	.step h3 {
+		font-size: 1.1rem;
+		margin: 0.4rem 0;
+	}
+
+	.step p {
+		color: hsl(var(--text-muted));
+		font-size: 0.95rem;
+	}
+
+	.faq {
+		padding-top: 2rem;
+	}
+
+	.faq-list {
+		display: grid;
+		gap: 0.75rem;
+		max-width: 820px;
+	}
+
+	.faq-item {
+		padding: 0 1.25rem;
+		border-radius: 1rem;
+		background: var(--surface);
+		border: 1px solid var(--glass-border);
+	}
+
+	.faq-item summary {
+		display: flex;
+		justify-content: space-between;
+		gap: 1rem;
+		min-height: 44px;
+		padding: 1.1rem 0;
+		font-weight: 700;
+		line-height: 1.4;
+		cursor: pointer;
+		list-style: none;
+	}
+
+	.faq-item summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.faq-item summary::after {
+		content: '+';
+		flex: none;
+		font-size: 1.4rem;
+		line-height: 1;
+		color: hsl(var(--primary-light));
+		transition: transform 0.25s ease;
+	}
+
+	.faq-item[open] summary::after {
+		transform: rotate(45deg);
+	}
+
+	.faq-item p {
+		color: hsl(var(--text-muted));
+		padding-bottom: 1.2rem;
+	}
+
+	.contact-alt {
+		color: hsl(var(--text-muted));
+		margin-top: 1rem;
+		overflow-wrap: anywhere;
+	}
+
+	.contact-alt a {
+		color: hsl(var(--primary-light));
+		font-weight: 600;
+	}
+
+	.mobile-cta {
+		display: none;
 	}
 
 	.contact-content {
 		min-width: 0;
 		overflow-wrap: anywhere;
-		padding: 5rem;
-		border-radius: 2.5rem;
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+		gap: 4rem;
+		align-items: start;
 	}
 
 	.contact-desc {
 		font-size: 1.125rem;
 		color: hsl(var(--text-muted));
 		max-width: 600px;
-		margin: 1rem auto 0;
 	}
 
 	.contact-form {
 		display: flex;
 		flex-direction: column;
 		gap: 1.5rem;
-		max-width: 600px;
-		margin: 0 auto;
-		text-align: left;
+		padding: 2rem;
+		border-radius: 2rem;
+		background: var(--surface);
+		border: 1px solid var(--glass-border);
 	}
 
 	.form-grid {
@@ -346,7 +528,8 @@ const stats = [
 		font-size: 1rem;
 		line-height: 1.5;
 		padding: 0.75rem 1rem;
-		color: white;
+		color: hsl(var(--text));
+		background: hsl(var(--background));
 		outline: none;
 		transition: border-color 0.2s;
 		font-family: inherit;
@@ -360,6 +543,8 @@ const stats = [
 
 	.field-hint { color: hsl(var(--text-muted)); }
 	.field-error { color: hsl(0 90% 82%); }
+	:global([data-theme='light']) .field-error { color: hsl(0 72% 40%); }
+	:global([data-theme='light']) .input-field[aria-invalid="true"] { border-color: hsl(0 72% 40%); }
 	.field-error[hidden] { display: none; }
 	.input-field[aria-invalid="true"] { border-color: hsl(0 90% 82%); }
 	.input-field::placeholder { color: hsl(var(--text-muted)); opacity: 1; }
@@ -372,7 +557,7 @@ const stats = [
 
 	.input-field:focus {
 		border-color: hsl(var(--primary-light));
-		background: hsla(224, 71%, 15%, 0.6);
+		background: hsl(var(--background));
 	}
 
 	.sr-only {
@@ -445,30 +630,72 @@ const stats = [
 	}
 
 	.toast-success {
-		border-left: 4px solid hsl(1189, 74%, 43%);
+		border-left: 4px solid hsl(189, 74%, 43%);
 	}
 
 	.toast-error {
 		border-left: 4px solid hsl(0, 84%, 60%);
 	}
 
-	@media (max-width: 768px) {
-		.about-content, .contact-content {
-			padding: 3rem 1.5rem;
+	@media (max-width: 900px) {
+		.section-padding {
+			padding: 4rem 0;
 		}
-		
-		.stats-grid {
-			grid-template-columns: 1fr 1fr;
+
+		.needs-grid,
+		.contact-content {
+			grid-template-columns: minmax(0, 1fr);
+			gap: 2rem;
+		}
+
+		.need-card {
+			padding: 1.4rem;
+		}
+
+		/* Process becomes a vertical timeline. */
+		.steps {
+			grid-template-columns: minmax(0, 1fr);
+			gap: 0;
+		}
+
+		.step {
+			border-top: 0;
+			border-left: 3px solid hsl(var(--primary-light));
+			padding: 0 0 1.75rem 1rem;
+		}
+
+		.contact-form {
+			padding: 1.4rem;
+			border-radius: 1.5rem;
 		}
 
 		.form-grid {
-			grid-template-columns: 1fr;
+			grid-template-columns: minmax(0, 1fr);
 		}
-	}
-	
-	@media (max-width: 480px) {
-		.stats-grid {
-			grid-template-columns: 1fr;
+
+		.mobile-cta {
+			display: flex;
+			justify-content: center;
+			position: fixed;
+			left: 1.25rem;
+			right: 1.25rem;
+			bottom: calc(1rem + env(safe-area-inset-bottom));
+			z-index: 90;
+			padding: 1rem;
+			transform: translateY(160%);
+			visibility: hidden;
+			transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1), visibility 0s linear 0.35s;
+		}
+
+		/* visibility keeps the off-screen CTA out of the tab order and the accessibility tree. */
+		.mobile-cta.show {
+			transform: none;
+			visibility: visible;
+			transition-delay: 0s;
+		}
+
+		:global(.container) {
+			padding: 0 1.25rem;
 		}
 	}
 </style>
