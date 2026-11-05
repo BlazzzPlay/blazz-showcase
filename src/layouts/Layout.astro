@@ -37,7 +37,17 @@ const seoMeta = buildSeoMeta(mergedSeo);
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <!-- Apply the saved or system theme before first paint to avoid a flash. -->
+    <script is:inline>
+      (function () {
+        var t;
+        try { t = localStorage.getItem('fm-theme'); } catch (e) {}
+        if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     
@@ -83,6 +93,7 @@ const seoMeta = buildSeoMeta(mergedSeo);
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   </head>
   <body>
+    <div class="scroll-progress" aria-hidden="true"></div>
     <div class="background-wrapper">
       <div class="bg-blob blob-1"></div>
       <div class="bg-blob blob-2"></div>
@@ -103,6 +114,40 @@ const seoMeta = buildSeoMeta(mergedSeo);
         const start = () => initDotField(dotCanvas);
         if ('requestIdleCallback' in window) requestIdleCallback(start, { timeout: 1500 });
         else setTimeout(start, 300);
+      }
+
+      // Reading progress bar along the top edge.
+      const progress = document.querySelector<HTMLElement>('.scroll-progress');
+      if (progress && !prefersReducedMotion) {
+        const onScroll = () => {
+          const max = document.documentElement.scrollHeight - window.innerHeight;
+          progress.style.transform = `scaleX(${max > 0 ? window.scrollY / max : 0})`;
+        };
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+      }
+
+      // Count-up numbers ([data-count]) when they enter the viewport.
+      const counters = document.querySelectorAll<HTMLElement>('[data-count]');
+      if (!prefersReducedMotion && 'IntersectionObserver' in window) {
+        const countObserver = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            const el = entry.target as HTMLElement;
+            countObserver.unobserve(el);
+            const target = Number(el.dataset.count);
+            const prefix = el.dataset.prefix ?? '';
+            const suffix = el.dataset.suffix ?? '';
+            const start = performance.now();
+            const tick = (now: number) => {
+              const k = Math.min((now - start) / 1100, 1);
+              el.textContent = `${prefix}${Math.round(target * (1 - Math.pow(1 - k, 3)))}${suffix}`;
+              if (k < 1) requestAnimationFrame(tick);
+            };
+            requestAnimationFrame(tick);
+          });
+        }, { threshold: 0.6 });
+        counters.forEach((el) => countObserver.observe(el));
       }
 
       // Staggered reveal: children of [data-reveal-stagger] enter one after another.
@@ -181,6 +226,48 @@ const seoMeta = buildSeoMeta(mergedSeo);
         
         --font-main: 'Inter', sans-serif;
         --font-display: 'Outfit', sans-serif;
+
+        /* Raised surface (cards, forms) and blob strength for the dark theme. */
+        --surface: hsla(224, 71%, 10%, 0.55);
+        --blob-opacity: 0.15;
+      }
+
+      /* Light theme: ink and canvas swap, so every hsl(var(--text)) / hsl(var(--background)) follows. */
+      [data-theme='light'] {
+        --background: 210 40% 98%;
+        --text: 224 71% 4%;
+        --text-muted: 224 25% 30%;
+        --primary-light: 263 70% 50%;
+        --glass: hsla(0, 0%, 100%, 0.7);
+        --glass-border: hsla(224, 71%, 4%, 0.1);
+        --surface: hsl(0 0% 100%);
+        --blob-opacity: 0.08;
+      }
+
+      html {
+        transition: background-color 0.35s ease, color 0.35s ease;
+      }
+
+      .scroll-progress {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        transform: scaleX(0);
+        transform-origin: 0 50%;
+        background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--accent)), hsl(var(--accent-light)));
+        z-index: 200;
+        pointer-events: none;
+      }
+
+      .eyebrow {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        font-weight: 700;
+        color: hsl(var(--primary-light));
+        margin-bottom: 0.75rem;
       }
 
       * {
@@ -206,7 +293,12 @@ const seoMeta = buildSeoMeta(mergedSeo);
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         min-height: 100vh;
-        overflow-x: hidden;
+        overflow-x: clip;
+        line-height: 1.65;
+      }
+
+      h1, h2, h3, p, li, summary {
+        overflow-wrap: break-word;
       }
 
       h1, h2, h3, h4, h5, h6 {
@@ -234,7 +326,7 @@ const seoMeta = buildSeoMeta(mergedSeo);
       .bg-blob {
         position: absolute;
         filter: blur(80px);
-        opacity: 0.15;
+        opacity: var(--blob-opacity);
         border-radius: 50%;
         animation: float 20s infinite alternate;
       }
@@ -390,6 +482,8 @@ const seoMeta = buildSeoMeta(mergedSeo);
           animation-iteration-count: 1 !important;
           transition-duration: 0.01ms !important;
         }
+
+        .scroll-progress { display: none; }
 
         [data-animate="fade-up"],
         [data-reveal]:not(#_) {

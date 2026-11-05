@@ -169,9 +169,9 @@ test('desktop and mobile: hero value proposition and primary CTA are clear and v
   await expect(description).toBeVisible();
   await expect(primaryCta).toBeVisible();
 
-  await expect(title).toContainText('Desarrollo SaaS & EdTech');
-  await expect(description).toContainText('productos digitales usables y escalables');
-  await expect(primaryCta).toHaveText('Iniciar Proyecto');
+  await expect(title).toContainText('sin depender de nadie');
+  await expect(description).toContainText('para educación en Chile');
+  await expect(primaryCta).toHaveText('Contar mi proyecto');
 
   const ctaBox = await primaryCta.boundingBox();
   expect(ctaBox).not.toBeNull();
