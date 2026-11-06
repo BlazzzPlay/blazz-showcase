@@ -42,8 +42,14 @@ test('dot field renders, reacts to the pointer and idles; reveal shows all conte
     await page.waitForTimeout(60);
   }
   await page.waitForTimeout(1500);
-  expect(await page.evaluate(hiddenCount(''), '.project-card, .about-text > *, .hero-text > *')).toBe(0);
-  expect(await page.locator('[data-reveal]').count()).toBe(0);
+  // Reveal replays on every entry, so only content currently on screen must be fully shown.
+  const hiddenInView = await page.evaluate(() =>
+    [...document.querySelectorAll('[data-reveal], [data-animate]')].filter((e) => {
+      const r = e.getBoundingClientRect();
+      return r.top >= 0 && r.bottom <= innerHeight && getComputedStyle(e).opacity !== '1';
+    }).length,
+  );
+  expect(hiddenInView).toBe(0);
 });
 
 test.describe('reduced motion', () => {
@@ -56,4 +62,44 @@ test.describe('reduced motion', () => {
     expect(await page.evaluate(hiddenCount(''), '.project-card, .about-text > *, .hero-text > *')).toBe(0);
     expect(await page.locator('[data-reveal]').count()).toBe(0);
   });
+});
+
+test('reveal replays: content hides when it leaves the viewport and animates again on return', async ({ page }) => {
+  await page.goto('/');
+  const card = page.locator('.project-card').first();
+  const opacity = () => card.evaluate((e) => getComputedStyle(e).opacity);
+
+  await card.scrollIntoViewIfNeeded();
+  await expect.poll(opacity, { timeout: 3000 }).toBe('1');
+
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await expect.poll(opacity, { timeout: 3000 }).not.toBe('1');
+
+  await card.scrollIntoViewIfNeeded();
+  await expect.poll(opacity, { timeout: 3000 }).toBe('1');
+});
+
+test('click on empty background plays one subtle sound; clicks on controls stay silent', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'Dot field interaction needs a fine pointer');
+  await page.addInitScript(() => {
+    (window as any).__tones = 0;
+    const Real = window.AudioContext;
+    window.AudioContext = class extends Real {
+      createOscillator() {
+        const osc = super.createOscillator();
+        const start = osc.start.bind(osc);
+        osc.start = (...a: any[]) => { (window as any).__tones++; return start(...a); };
+        return osc;
+      }
+    } as typeof AudioContext;
+  });
+  await page.goto('/');
+  await page.waitForSelector('.dot-field.is-ready');
+
+  await page.mouse.click(1380, 600);
+  await expect.poll(() => page.evaluate(() => (window as any).__tones)).toBe(1);
+
+  await page.locator('.nav-links a').first().click();
+  await page.waitForTimeout(300);
+  expect(await page.evaluate(() => (window as any).__tones)).toBe(1);
 });

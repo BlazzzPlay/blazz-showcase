@@ -159,38 +159,31 @@ const seoMeta = buildSeoMeta(mergedSeo);
         });
       });
 
-      // Intersection Observer for scroll animations
+      // Scroll reveal that replays: elements animate in every time they enter the viewport
+      // and reset when they leave it, so scrolling back up and down plays the effect again.
+      const revealTargets = document.querySelectorAll<HTMLElement>('[data-animate], [data-reveal]');
       if (!prefersReducedMotion && 'IntersectionObserver' in window) {
-        const observerOptions = {
-          root: null,
-          rootMargin: '0px',
-          threshold: 0.1
-        };
-
-        const observer = new IntersectionObserver((entries, observer) => {
-          entries.forEach(entry => {
+        const doneTimers = new WeakMap<Element, number>();
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            const target = entry.target as HTMLElement;
+            window.clearTimeout(doneTimers.get(target));
             if (entry.isIntersecting) {
-              entry.target.classList.add('is-visible');
-              observer.unobserve(entry.target);
+              target.classList.add('is-visible');
               // Once revealed, hand transitions back to the element's own styles (e.g. card hover).
-              // A timer (not transitionend) also covers elements revealed on the very first frame.
-              const target = entry.target as HTMLElement;
               if (target.hasAttribute('data-reveal')) {
                 const step = Number(target.style.getPropertyValue('--reveal-step')) || 0;
-                setTimeout(() => {
-                  target.removeAttribute('data-reveal');
-                  target.style.removeProperty('--reveal-step');
-                }, 700 + step * 90 + 100);
+                doneTimers.set(target, window.setTimeout(() => target.classList.add('reveal-done'), 700 + step * 90 + 100));
               }
+            } else {
+              target.classList.remove('is-visible', 'reveal-done');
             }
           });
-        }, observerOptions);
+        }, { root: null, rootMargin: '0px', threshold: 0.1 });
 
-        document.querySelectorAll('[data-animate], [data-reveal]').forEach((el) => {
-          observer.observe(el);
-        });
+        revealTargets.forEach((el) => observer.observe(el));
       } else {
-        document.querySelectorAll('[data-animate], [data-reveal]').forEach((el) => {
+        revealTargets.forEach((el) => {
           el.classList.add('is-visible');
           // No reveal to play: drop the override so elements keep their own hover styles.
           el.removeAttribute('data-reveal');
@@ -442,7 +435,7 @@ const seoMeta = buildSeoMeta(mergedSeo);
 
       /* Staggered reveal (rise + unblur), in the spirit of gentlemanprogramming.com */
       /* :not(#_) lifts specificity over scoped component transitions until the reveal ends. */
-      [data-reveal]:not(#_) {
+      [data-reveal]:not(#_):not(.reveal-done) {
         opacity: 0;
         transform: translate3d(0, 24px, 0) scale(0.98);
         filter: blur(6px);
@@ -453,7 +446,7 @@ const seoMeta = buildSeoMeta(mergedSeo);
         transition-delay: calc(var(--reveal-step, 0) * 90ms);
       }
 
-      [data-reveal]:not(#_).is-visible {
+      [data-reveal]:not(#_):not(.reveal-done).is-visible {
         opacity: 1;
         transform: none;
         filter: none;

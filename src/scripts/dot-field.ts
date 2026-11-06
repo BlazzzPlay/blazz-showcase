@@ -1,5 +1,5 @@
 // Interactive dot grid behind the page: dots move away from the pointer,
-// a click sends an expanding wave, and holding the button gathers nearby dots.
+// a click sends an expanding wave (with a subtle sound), and holding the button gathers nearby dots.
 // Inspired by the hero background of premiostech.la; vanilla canvas 2D, no deps.
 
 const GRID = 28; // px between dots
@@ -17,6 +17,38 @@ const PALETTE: [number, number, number][] = [
   [219, 39, 168],
   [28, 166, 191],
 ];
+
+// Subtle "bloop" played with the click wave: a short sine that drops in pitch.
+const SOUND = { volume: 0.05, attack: 0.008, decay: 0.32, startHz: 520, endHz: 260 };
+// Clicks on controls keep their own meaning and stay silent.
+const SILENT_TARGETS = 'a, button, input, textarea, select, summary, label, [role="button"]';
+
+let audio: AudioContext | null = null;
+
+function playWaveSound(power: number) {
+  const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  if (!Ctx) return;
+  try {
+    audio ??= new Ctx();
+    if (audio.state === 'suspended') void audio.resume();
+    const now = audio.currentTime;
+    const osc = audio.createOscillator();
+    const gain = audio.createGain();
+    // A stronger (held) wave sounds a little deeper and slightly louder.
+    const pitch = 1 / (1 + (power - 1) * 0.35);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(SOUND.startHz * pitch, now);
+    osc.frequency.exponentialRampToValueAtTime(SOUND.endHz * pitch, now + SOUND.decay);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(SOUND.volume * Math.min(power, 1.5), now + SOUND.attack);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + SOUND.decay);
+    osc.connect(gain).connect(audio.destination);
+    osc.start(now);
+    osc.stop(now + SOUND.decay + 0.02);
+  } catch {
+    // Audio is decorative; never let it break the interaction.
+  }
+}
 
 type Dot = { x: number; y: number; ox: number; oy: number; color: string };
 type Wave = { x: number; y: number; t: number; power: number };
@@ -173,7 +205,9 @@ export function initDotField(canvas: HTMLCanvasElement) {
     if (!press) return;
     const held = Math.min(1, (performance.now() - press.start) / 1000 / GATHER.chargeTime);
     if (waves.length >= WAVE.max) waves.shift();
-    waves.push({ x: e.clientX, y: e.clientY, t: 0, power: 1 + held * 0.8 });
+    const power = 1 + held * 0.8;
+    waves.push({ x: e.clientX, y: e.clientY, t: 0, power });
+    if (!(e.target instanceof Element && e.target.closest(SILENT_TARGETS))) playWaveSound(power);
     press = null;
     wake();
   });
