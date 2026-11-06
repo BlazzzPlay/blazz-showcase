@@ -110,3 +110,9 @@ test('/privacidad: single h1, legal references and no overflow at 390px', async 
   await expect(page.locator('main')).toContainText('blazzzplay@gmail.com');
   expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
 });
+
+test('the page has a single scrollbar: <main> never becomes its own scroll container', async ({ page }) => {
+  await page.goto('/');
+  const overflowY = await page.locator('main').evaluate((m) => getComputedStyle(m).overflowY);
+  expect(overflowY).toBe('visible');
+});
