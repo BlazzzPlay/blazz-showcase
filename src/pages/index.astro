@@ -302,8 +302,9 @@ const faqs = [
 </script>
 
 <style>
+	/* clip, not hidden: hidden would turn <main> into its own vertical scroll container. */
 	main {
-		overflow-x: hidden;
+		overflow-x: clip;
 	}
 
 	.section-head {
