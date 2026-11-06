@@ -9,10 +9,10 @@ const navItems = [
 
 <nav class="nav" aria-label="Navegación principal">
   <div class="container nav-content glass">
-    <div class="logo">
+    <a href="/#inicio" class="logo" aria-label="Fabian Mendoza, ir al inicio">
       <span class="logo-mark" aria-hidden="true">FM</span>
       <span class="logo-text">Fabian Mendoza</span>
-    </div>
+    </a>
     <ul class="nav-links">
       {navItems.map(item => (
         <li><a href={item.href}>{item.name}</a></li>
