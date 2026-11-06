@@ -116,3 +116,12 @@ test('the page has a single scrollbar: <main> never becomes its own scroll conta
   const overflowY = await page.locator('main').evaluate((m) => getComputedStyle(m).overflowY);
   expect(overflowY).toBe('visible');
 });
+
+test('the logo links to the home start from any page', async ({ page }) => {
+  await page.goto('/servicios');
+  const logo = page.getByRole('link', { name: 'Fabian Mendoza, ir al inicio' });
+  await expect(logo).toHaveAttribute('href', '/#inicio');
+  await logo.click();
+  await expect.poll(() => new URL(page.url()).pathname).toBe('/');
+  await expect(page.locator('#inicio')).toBeInViewport();
+});

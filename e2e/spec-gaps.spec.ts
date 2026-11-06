@@ -42,8 +42,8 @@ test('desktop: keyboard E2E completes CTA -> form_start -> submit_success funnel
 
   await page.goto('/');
 
-  // Tab through nav links until desktop CTA, then activate with keyboard.
-  for (let i = 0; i < 5; i += 1) {
+  // Tab through the logo and nav links until desktop CTA, then activate with keyboard.
+  for (let i = 0; i < 6; i += 1) {
     await page.keyboard.press('Tab');
   }
 
